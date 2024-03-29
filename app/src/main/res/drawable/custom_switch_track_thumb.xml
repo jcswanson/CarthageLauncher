@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- custom_switch_track_thumb.xml -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Unselected state -->
+    <item android:drawable="@color/switchTrackColor" android:state_checked="false" />
+    <item android:drawable="@color/switchThumbColor" android:state_checked="false" android:state_enabled="false" />
+
+    <!-- Selected state -->
+    <item android:drawable="@color/switchTrackSelectedColor" android:state_checked="true" />
+    <item android:drawable="@color/switchTrackSelectedColor" android:state_checked="true" android:state_enabled="false" />
+</selector>

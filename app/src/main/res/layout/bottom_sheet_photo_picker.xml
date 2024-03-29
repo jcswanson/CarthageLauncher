@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rlParent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/llTopView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/_10sdp"
+        android:layout_marginEnd="@dimen/_10sdp"
+        android:layout_marginBottom="@dimen/_7sdp"
+        android:background="@drawable/bottom_sheet_drawable_all_corner_rounded"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvPhotoGallery"
+            style="@style/textview_blue_regular_16"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="@dimen/_12sdp"
+            android:text="Select from Gallery"
+            android:textColor="@color/grey_A2" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/grey_DF" />
+
+        <TextView
+            android:id="@+id/tvCamera"
+            style="@style/textview_blue_regular_16"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="@dimen/_12sdp"
+            android:text="Camera"
+            android:textColor="@color/grey_A2" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvCancel"
+        style="@style/textview_blue_regular_16"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/llTopView"
+        android:layout_marginStart="@dimen/_10sdp"
+        android:layout_marginEnd="@dimen/_10sdp"
+        android:layout_marginBottom="@dimen/_10sdp"
+        android:background="@drawable/bottom_sheet_drawable_all_corner_rounded"
+        android:gravity="center"
+        android:padding="@dimen/_12sdp"
+        android:text="Cancel"
+        android:textColor="@color/red" />
+
+</RelativeLayout>
