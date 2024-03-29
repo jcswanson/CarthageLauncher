@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "69077313758",
+    "project_id": "simple-phone-e78ac",
+    "storage_bucket": "simple-phone-e78ac.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:69077313758:android:e38ac993de303470f47a4f",
+        "android_client_info": {
+          "package_name": "com.codesteem.mylauncher"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "69077313758-v0t4su9298sjqllbfn9r6djk3p0rmar2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBA7xzKT2oR6sEZApU_MVhKNSPMfOoiB3c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "69077313758-v0t4su9298sjqllbfn9r6djk3p0rmar2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

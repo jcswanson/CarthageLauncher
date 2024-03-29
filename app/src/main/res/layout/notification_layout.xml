@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:clipToPadding="false"
+    tools:background="@android:color/darker_gray"
+    tools:foreground="?android:attr/selectableItemBackground"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/app_icon"
+        android:layout_width="@dimen/alerter_alert_icn_size"
+        android:layout_height="@dimen/alerter_alert_icn_size"
+        android:maxWidth="@dimen/alerter_alert_icn_size"
+        android:maxHeight="@dimen/alerter_alert_icn_size"
+        app:layout_constraintBottom_toTopOf="@+id/replyEt"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/alerter_ic_notifications"
+        app:tint="@color/alert_default_icon_color"
+        tools:visibility="visible" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/alerter_padding_half"
+        android:layout_marginEnd="@dimen/alerter_padding_half"
+        android:paddingStart="@dimen/alerter_padding_small"
+        android:paddingLeft="@dimen/alerter_padding_small"
+        android:paddingEnd="@dimen/alerter_padding_small"
+        android:textAppearance="@style/AlertTextAppearance.Title"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/app_icon"
+        tools:text="Title"
+        tools:visibility="visible" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/content"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/alerter_padding_half"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:paddingStart="@dimen/alerter_padding_small"
+        android:paddingLeft="@dimen/alerter_padding_small"
+        android:paddingTop="@dimen/alerter_padding_small"
+        android:paddingEnd="@dimen/alerter_padding_small"
+        android:paddingBottom="@dimen/alerter_padding_small"
+        android:textAppearance="@style/AlertTextAppearance.Text"
+        app:layout_constraintEnd_toStartOf="@+id/expand"
+        app:layout_constraintStart_toEndOf="@+id/app_icon"
+        app:layout_constraintTop_toBottomOf="@+id/title"
+        tools:text="Text"
+        tools:visibility="visible" />
+
+    <ImageView
+        android:id="@+id/expand"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="10dp"
+        android:src="@drawable/ic_down_arrow"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/content" />
+
+    <EditText
+        android:id="@+id/replyEt"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_margin="10dp"
+        android:background="@drawable/edittext_background"
+        android:hint="Reply"
+        android:paddingStart="10dp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toStartOf="@+id/reply_btn"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/content"
+        tools:visibility="visible" />
+
+    <ImageView
+        android:id="@+id/reply_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/_10sdp"
+        android:clickable="false"
+        android:src="@drawable/ic_reply"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/replyEt"
+        app:layout_constraintBottom_toTopOf="@+id/bottomLinearLayout"
+        tools:visibility="visible" />
+
+
+    <LinearLayout
+        android:id="@+id/bottomLinearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/replyEt"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <!-- Programmatically add buttons here in your Kotlin/Java code -->
+
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

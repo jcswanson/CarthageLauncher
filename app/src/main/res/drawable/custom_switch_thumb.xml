@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- custom_switch_thumb.xml -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Thumb appearance when the switch is checked (ON) -->
+    <item android:drawable="@drawable/thumb_image"
+        android:state_checked="true" />
+    <!-- Thumb appearance when the switch is unchecked (OFF) -->
+    <item android:drawable="@drawable/thumb_image" />
+</selector>
