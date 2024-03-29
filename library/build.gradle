@@ -1,0 +1,42 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+//apply plugin: 'kotlin-android-extensions'
+
+ext {
+    PUBLISH_GROUP_ID = 'com.github.thesurix'
+    PUBLISH_VERSION = '1.17.0'
+    PUBLISH_ARTIFACT_ID = 'gesture-recycler'
+}
+
+apply from: "${rootProject.projectDir}/publish-mavencentral.gradle"
+
+android {
+    compileSdkVersion project.getProperty("compileSdk") as Integer
+    buildToolsVersion buildTools
+
+    defaultConfig {
+        minSdkVersion project.getProperty("minSdk") as Integer
+        targetSdkVersion project.getProperty("targetSdk") as Integer
+        versionCode 1
+        versionName version
+    }
+    buildTypes {
+        release {
+            consumerProguardFiles 'lib-proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    implementation supportDependencies.recyclerView
+    implementation supportDependencies.appCompat
+    implementation langDependencies.kotlin
+
+    testImplementation testDependencies.junit
+    testImplementation testDependencies.mockito
+    testImplementation testDependencies.junitKotlin
+}
+
+tasks.withType(Javadoc).all {
+    enabled = false
+}
