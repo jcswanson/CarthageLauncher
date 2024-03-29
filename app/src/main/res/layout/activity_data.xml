@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center|top"
+    android:orientation="vertical"
+    android:layout_margin="@dimen/_10sdp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1"
+                android:background="#000000" /> <!-- Left Line -->
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="All Apps"
+                android:textSize="18sp"
+                android:fontFamily="@font/opensans_regular"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:layout_marginHorizontal="16dp" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1"
+                android:background="#000000" /> <!-- Right Line -->
+        </LinearLayout>
+    </LinearLayout>
+
+
+    <TextView
+        android:id="@+id/tvEmptyListTop"
+        android:layout_width="match_parent"
+        android:layout_height="110dp"
+        android:background="#cccccc"
+        android:gravity="center"
+        android:text="Top List is Empty!"
+        android:textSize="20sp"
+        android:visibility="gone" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvTop"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_350sdp"
+        android:animateLayoutChanges="false"
+        />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1"
+                android:background="#000000" /> <!-- Left Line -->
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="General Folder"
+                android:textSize="18sp"
+                android:fontFamily="@font/opensans_regular"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:layout_marginHorizontal="16dp" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1"
+                android:background="#000000" /> <!-- Right Line -->
+        </LinearLayout>
+    </LinearLayout>
+
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvBottom"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_80sdp" />
+
+    <TextView
+        android:id="@+id/tvEmptyListBottom"
+        android:layout_width="match_parent"
+        android:layout_height="110dp"
+        android:background="#cccccc"
+        android:gravity="center"
+        android:text="Bottom List is Empty!"
+        android:textSize="20sp"
+        android:visibility="gone" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1"
+                android:background="#000000" /> <!-- Left Line -->
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Hidden Apps"
+                android:textSize="18sp"
+                android:fontFamily="@font/opensans_regular"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:layout_marginHorizontal="16dp" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1"
+                android:background="#000000" /> <!-- Right Line -->
+        </LinearLayout>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvMid"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_80sdp" />
+
+        <TextView
+            android:id="@+id/tvEmptyListMid"
+            android:layout_width="match_parent"
+            android:layout_height="110dp"
+            android:background="#cccccc"
+            android:gravity="center"
+            android:text="Mid List is Empty!"
+            android:textSize="20sp"
+            android:visibility="gone" />
+    </LinearLayout>
+
+</LinearLayout>
+
