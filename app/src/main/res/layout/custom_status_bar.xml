@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- custom_status_bar.xml -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:id="@+id/customStatusBar"
+    android:layout_height="?android:attr/actionBarSize"
+    android:background="@color/gray_back"
+    >
+
+    <!-- Your custom status bar content goes here -->
+    <!-- Include the switch button, user avatar, etc. -->
+
+</FrameLayout>
+
