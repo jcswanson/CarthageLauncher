@@ -26,15 +26,23 @@ import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-abstract class BaseActivity<VB: ViewBinding> : AppCompatActivity() {
+// Define an abstract base class for activities with ViewBinding support
+abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
+
+    // Lateinit property for ViewBinding instance
     protected lateinit var binding: VB
 
+    // Called when the activity is starting.
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Initialize the ViewBinding instance
         binding = getViewBinding()
+
+        // Set the content view using the inflated layout
         setContentView(binding.root)
     }
 
+    // Abstract method to get the ViewBinding instance
     abstract fun getViewBinding(): VB
-
 }
