@@ -1,55 +1,46 @@
-// Apply the Android Library plugin to enable building Android libraries.
 apply plugin: 'com.android.library'
-
-// Apply the Kotlin plugin to enable Kotlin support.
 apply plugin: 'kotlin-android'
-
-// Disabled the Kotlin Android Extensions plugin, as it's no longer recommended.
-//apply plugin: 'kotlin-android-extensions'
 
 // Version information for publishing the library.
 ext {
-    // The group ID for the published library.
     PUBLISH_GROUP_ID = 'com.github.thesurix'
-    // The version number for the published library.
     PUBLISH_VERSION = '1.17.0'
-    // The artifact ID for the published library.
     PUBLISH_ARTIFACT_ID = 'gesture-recycler'
 }
 
 // Include the Gradle script for publishing to Maven Central.
 apply from: "${rootProject.projectDir}/publish-mavencentral.gradle"
 
-// Configuration for the Android build process.
 android {
-    // The version of the Android SDK to compile against.
-    compileSdkVersion project.getProperty("compileSdk") as Integer
-    // The version of the Android build tools to use.
+    compileSdkVersion rootProject.ext.compileSdk
     buildToolsVersion buildTools
 
-    // Default configuration settings for the Android build.
     defaultConfig {
-        // The minimum Android version to support.
-        minSdkVersion project.getProperty("minSdk") as Integer
-        // The target Android version to support.
-        targetSdkVersion project.getProperty("targetSdk") as Integer
-        // The version code for the library.
+        minSdkVersion rootProject.ext.minSdk
+        targetSdkVersion rootProject.ext.targetSdk
         versionCode 1
-        // The version name for the library.
-        versionName version
+        versionName rootProject.ext.version
     }
 
-    // Configuration settings for the release build type.
     buildTypes {
         release {
-            // The ProGuard rules file for the release build.
             consumerProguardFiles 'lib-proguard-rules.pro'
         }
     }
 }
 
-// Dependencies for the project.
 dependencies {
-    // Implementation dependencies for the project.
-    implementation supportDependencies.recyclerView
-    implementation supportDependencies.app
+    implementation "androidx.recyclerview:recyclerview:1.2.1"
+    implementation "androidx.appcompat:appcompat:1.3.1"
+}
+
+// Define the support dependencies version map.
+ext {
+    supportDependencies = [
+        recyclerView: '1.2.1',
+        app: '1.3.1'
+    ]
+}
+
+// Define the build tools version.
+def buildTools = '30.0.3'
