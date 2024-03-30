@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
  * @param listener The ItemClickListener that will be notified when tap, long press, or double tap events occur.
  * @author thesurix
  */
-class RecyclerItemTouchListener<T>(private val listener: ItemClickListener<T>) : RecyclerView.SimpleOnItemTouchListener() {
+class RecyclerItemTouchListener<T>(private val listener: ItemClickListener<T>) : RecyclerView.OnItemTouchListener {
 
     // Interface for listeners interested in item click events
     interface ItemClickListener<T> {
@@ -29,8 +29,7 @@ class RecyclerItemTouchListener<T>(private val listener: ItemClickListener<T>) :
     }
 
     // GestureClickListener handles gesture events and maps them to corresponding item click events
-    private class GestureClickListener<T>(private val listener: RecyclerItemTouchListener.ItemClickListener<T>)
-        : GestureDetector.SimpleOnGestureListener() {
+    private inner class GestureClickListener(private val itemClickListener: ItemClickListener<T>) : GestureDetector.SimpleOnGestureListener() {
 
         // The currently touched item and its position
         private var item: T? = null
@@ -44,17 +43,17 @@ class RecyclerItemTouchListener<T>(private val listener: ItemClickListener<T>) :
 
         // Called when a single tap is confirmed
         override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
-            return item?.let { listener.onItemClick(it, viewPosition) } ?: false
+            return item?.let { itemClickListener.onItemClick(it, viewPosition) } ?: false
         }
 
         // Called when a long press is detected
         override fun onLongPress(e: MotionEvent) {
-            item?.let { listener.onItemLongPress(it, viewPosition) }
+            item?.let { itemClickListener.onItemLongPress(it, viewPosition) }
         }
 
         // Called when a double tap is detected
         override fun onDoubleTap(e: MotionEvent): Boolean {
-            return item?.let { listener.onDoubleTap(it, viewPosition) } ?: false
+            return item?.let { itemClickListener.onDoubleTap(it, viewPosition) } ?: false
         }
     }
 
@@ -62,13 +61,13 @@ class RecyclerItemTouchListener<T>(private val listener: ItemClickListener<T>) :
     private var gestureDetector: GestureDetector? = null
 
     // Overridden method called when a touch event is detected
-    override fun onInterceptTouchEvent(view: RecyclerView, e: MotionEvent): Boolean {
+    override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
 
         // Get the child view under the touch event coordinates
-        val childView = view.findChildViewUnder(e.x, e.y) ?: return false
+        val childView = rv.findChildViewUnder(e.x, e.y) ?: return false
 
         // Get the child view's position in the RecyclerView
-        val childPosition = view.getChildAdapterPosition(childView)
+        val childPosition = rv.getChildAdapterPosition(childView)
 
         // Return if the child position is not valid
         if (childPosition == RecyclerView.NO_POSITION) {
@@ -76,7 +75,7 @@ class RecyclerItemTouchListener<T>(private val listener: ItemClickListener<T>) :
         }
 
         // Get the adapter for the RecyclerView
-        val adapter = view.adapter
+        val adapter = rv.adapter
 
         // Check if the adapter is an instance of GestureAdapter
         if (adapter is GestureAdapter<*, *>) {
@@ -88,10 +87,20 @@ class RecyclerItemTouchListener<T>(private val listener: ItemClickListener<T>) :
 
         // Initialize the GestureDetector if it's null
         if (gestureDetector == null) {
-            gestureDetector = GestureDetector(view.context, gestureClickListener)
+            gestureDetector = GestureDetector(rv.context, gestureClickListener)
         }
 
         // Return whether the GestureDetector detected a gesture
         return gestureDetector?.onTouchEvent(e) ?: false
+    }
+
+    // Overridden method called when a touch event is released
+    override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {
+        // Do nothing
+    }
+
+    // Overridden method called when a touch event is released
+    override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {
+        // Do nothing
     }
 }
