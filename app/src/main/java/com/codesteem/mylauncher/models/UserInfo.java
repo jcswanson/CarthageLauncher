@@ -4,65 +4,54 @@ package com.codesteem.mylauncher.models;
  * Represents user information for a given user in the MyLauncher app.
  */
 public class UserInfo {
+
     // The URL or file path to the user's profile image
     private String userImage;
-    
+
     // The user's name
     private String userName;
-    
-    // The user's phone number
-    private String phone;
-    
-    // The user's email address
-    private String email;
-    
-    // The user's WhatsApp number
-    private String whatsapp;
-    
-    // The user's Instagram handle
-    private String instagram;
-    
-    // The user's Messenger ID
-    private String messenger;
-    
-    // The user's Snapchat handle
-    private String snapchat;
-    
+
+    // The user's contact details
+    private ContactDetails contactDetails;
+
+    // The user's social media handles
+    private SocialMediaHandles socialMediaHandles;
+
     // A placeholder field for future use
-    private String x;
-    
-    // The user's Discord handle
-    private String discordNow;
+    private String placeholder;
 
     /**
      * Constructs a new UserInfo object with the given user information.
      *
-     * @param userImage The URL or file path to the user's profile image
-     * @param userName The user's name
-     * @param phone The user's phone number
-     * @param email The user's email address
-     * @param whatsapp The user's WhatsApp number
-     * @param instagram The user's Instagram handle
-     * @param messenger The user's Messenger ID
-     * @param snapchat The user's Snapchat handle
-     * @param x A placeholder field for future use
-     * @param discordNow The user's Discord handle
+     * @param userImage        The URL or file path to the user's profile image
+     * @param userName         The user's name
+     * @param contactDetails   The user's contact details
+     * @param socialMediaHandles The user's social media handles
+     * @param placeholder      A placeholder field for future use
      */
-    public UserInfo(String userImage, String userName, String phone, String email, String whatsapp,
-                    String instagram, String messenger, String snapchat, String x, String discordNow) {
+    public UserInfo(String userImage, String userName, ContactDetails contactDetails,
+                    SocialMediaHandles socialMediaHandles, String placeholder) {
         this.userImage = userImage;
         this.userName = userName;
-        this.phone = phone;
-        this.email = email;
-        this.whatsapp = whatsapp;
-        this.instagram = instagram;
-        this.messenger = messenger;
-        this.snapchat = snapchat;
-        this.x = x;
-        this.discordNow = discordNow;
+        this.contactDetails = contactDetails;
+        this.socialMediaHandles = socialMediaHandles;
+        this.placeholder = placeholder;
     }
 
     /**
      * Returns the URL or file path to the user's profile image.
      *
+     * @return The user's profile image
+     */
+    public String getUserImage() {
+        return userImage;
+    }
+
+    /**
+     * Returns the user's name.
      *
+     * @return The user's name
+     */
+    public String getUserName() {
+        return userName;
+
