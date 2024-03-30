@@ -1,16 +1,1 @@
-# This script is responsible for building the project and preparing it for deployment.
-# It performs the following tasks:
-# 1. Compiles all source code files and generates executable binaries.
-# 2. Runs any necessary tests to ensure the build is stable and error-free.
-# 3. Generates documentation and other supporting files.
-# 4. Packages the build into a distributable format.
-# 5. Publishes the build to a repository or distribution channel.
-#
-# Before running this script, make sure you have the necessary dependencies and build tools installed.
-# You may need to configure the build settings and environment variables to match your project's requirements.
-#
-# To run the script, simply execute the following command:
-# $ python build.py
-#
-# If the build is successful, you should see a message indicating that the build was completed successfully.
-# If there are any errors or issues, the script will provide detailed error messages and suggestions for how to fix them.
+This script now
