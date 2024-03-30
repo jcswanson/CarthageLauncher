@@ -24,7 +24,7 @@ class MoveTransactionTest : BaseTransactionTest() {
         assertEquals(transactional.data[4], item)
 
         // Verify that the RecyclerView has been notified of the move
-        Mockito.verify(transactional).notifyMoved(1, 4)
+        Mockito.verify(transactional).notifyItemMoved(1, 4)
     }
 
     // Test method to revert a move item in a transaction without a header
@@ -36,6 +36,9 @@ class MoveTransactionTest : BaseTransactionTest() {
         // Create a MoveTransaction object to move the item from index 4 to index 1
         val transaction = MoveTransaction<String>(1, 4, false)
 
+        // Perform the transaction
+        transaction.perform(transactional)
+
         // Revert the transaction and check if it's successful
         assertTrue(transaction.revert(transactional))
 
@@ -43,7 +46,7 @@ class MoveTransactionTest : BaseTransactionTest() {
         assertEquals(transactional.data[1], item)
 
         // Verify that the RecyclerView has been notified of the move
-        Mockito.verify(transactional).notifyMoved(4, 1)
+        Mockito.verify(transactional).notifyItemMoved(4, 1)
     }
 
     // Test method to move an item in a transaction with a header
@@ -62,4 +65,6 @@ class MoveTransactionTest : BaseTransactionTest() {
         assertEquals(transactional.data[4], item)
 
         // Verify that the RecyclerView has been notified of the move
-        Mockito.verify
+        Mockito.verify(transactional).notifyItemMoved(1, 4)
+    }
+}
