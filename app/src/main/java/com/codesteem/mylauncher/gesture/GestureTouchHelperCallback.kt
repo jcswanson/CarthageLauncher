@@ -3,41 +3,50 @@ package com.codesteem.mylauncher.gesture
 import android.graphics.Canvas
 import android.view.View
 import androidx.recyclerview.widget.*
-import com.codesteem.mylauncher.gesture.LayoutFlags.*
 
 /**
- * Touch helper callback that handles different RecycleView gestures.
+ * Touch helper callback that handles different RecyclerView gestures.
  * Constructs callback object based on passed adapter.
  *
  * @param adapter adapter
  * @author thesurix
  */
-private val DIRECTIONS = listOf(ItemTouchHelper.LEFT, ItemTouchHelper.RIGHT, ItemTouchHelper.UP, ItemTouchHelper.DOWN)
-class GestureTouchHelperCallback(private val gestureAdapter: GestureAdapter<*, *>) : ItemTouchHelper.Callback() {
+private const val DIRECTIONS = ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT or ItemTouchHelper.UP or ItemTouchHelper.DOWN
+
+class GestureTouchHelperCallback(private val gestureAdapter: GestureAdapter<*, *>) :
+    ItemTouchHelper.Callback() {
 
     /**
      * Flag that enables or disables swipe gesture 
      */
     var swipeEnabled = false
+        set(value) {
+            field = value
+            gestureAdapter.swipeEnabled = value
+        }
 
     /**
      * Flag that enables or disables manual drag gesture 
      */
     var manualDragEnabled = false
-        set(enabled) {
-            field = enabled
-            gestureAdapter.allowManualDrag(manualDragEnabled) // Allows or disallows manual dragging for the adapter
+        set(value) {
+            field = value
+            gestureAdapter.manualDragEnabled = value
         }
 
     /**
      * Flag that enables long press drag gesture 
      */
     var longPressDragEnabled = false
+        set(value) {
+            field = value
+            gestureAdapter.longPressDragEnabled = value
+        }
 
     /**
      * Flags for drag gesture 
      */
-    var dragFlags = ItemTouchHelper.UP or ItemTouchHelper.DOWN
+    var dragFlags = DIRECTIONS
 
     /**
      * Flags for swipe gesture 
@@ -114,26 +123,26 @@ class GestureTouchHelperCallback(private val gestureAdapter: GestureAdapter<*, *
         actionState: Int,
         isCurrentlyActive: Boolean
     ) {
-        when (actionState) {
-            ItemTouchHelper.ACTION_STATE_SWIPE -> {
-                // Handle swipe gestures
-                val direction = when {
-                    dX.compareTo(0f) == 0 -> if (dY < 0) ItemTouchHelper.UP else ItemTouchHelper.DOWN
-                    dY.compareTo(0f) == 0 -> if (dX < 0) ItemTouchHelper.LEFT else ItemTouchHelper.RIGHT
-                    else -> -1
-                }
+        if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
+            val direction = when {
+                dX.compareTo(0f) == 0 -> if (dY < 0) ItemTouchHelper.UP else ItemTouchHelper.DOWN
+                dY.compareTo(0f) == 0 -> if (dX < 0) ItemTouchHelper.LEFT else ItemTouchHelper.RIGHT
+                else -> -1
+            }
 
-                val gestureViewHolder = (viewHolder as GestureViewHolder<*>)
-                hideBackgroundViews(gestureViewHolder) // Hide any previously visible background views
+            val gestureViewHolder = viewHolder as GestureViewHolder<*>
+            hideBackgroundViews(gestureViewHolder) // Hide any previously visible background views
 
-                if (direction != -1) {
-                    val backgroundView = gestureViewHolder.getBackgroundView(direction)
-                    backgroundView?.let {
-                        if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE && backgroundView.visibility == View.GONE) {
-                            backgroundView.visibility = View.VISIBLE // Show the background view if it's not already visible
-                        }
+            if (direction != -1) {
+                val backgroundView = gestureViewHolder.getBackgroundView(direction)
+                backgroundView?.let {
+                    if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE && backgroundView.visibility == View.GONE) {
+                        backgroundView.visibility = View.VISIBLE // Show the background view if it's not already visible
                     }
                 }
+            }
 
-                val foregroundView = gestureViewHolder.foregroundView
-                getDefaultUIUtil().on
+            val foregroundView = gestureViewHolder.foregroundView
+            getDefaultUIUtil().onDraw(
+                c,
+                recyclerView,
