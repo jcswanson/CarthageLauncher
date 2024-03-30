@@ -1,1 +1,18 @@
-/build
+# This is the main build script for our project.
+# It contains commands to compile, test, and package our code.
+
+# First, let's install any necessary dependencies.
+# We use the 'npm install' command to install Node.js packages.
+npm install
+
+# Next, we compile our TypeScript code into JavaScript.
+# We use the 'tsc' command to compile all .ts files in the 'src' directory.
+tsc
+
+# After compiling our code, we run our unit tests.
+# We use the 'npm test' command to run tests defined in our 'package.json' file.
+npm test
+
+# If our tests pass, we package our code for distribution.
+# We use the 'npm run package' command to create a .tar.gz file in the 'dist' directory.
+npm test && npm run package
