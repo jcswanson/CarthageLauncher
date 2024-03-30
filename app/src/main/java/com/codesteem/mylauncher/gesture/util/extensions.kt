@@ -11,7 +11,12 @@ import androidx.core.view.isVisible
  * @param firstIndex the index of the first item to swap
  * @param secondIndex the index of the second item to swap
  */
-fun <T> MutableList<T>.swap(firstIndex: Int, secondIndex: Int) {
+fun <T> MutableList<T>.safeSwap(firstIndex: Int, secondIndex: Int) {
+    // Check if the indices are within the list bounds
+    require(firstIndex in 0 until size && secondIndex in 0 until size) {
+        "Indices $firstIndex and $secondIndex are out of bounds for list of size $size"
+    }
+
     // Temporarily store the value of the first index in a variable 'tmp'
     val tmp = this[firstIndex]
     // Set the value at the first index to the value at the second index
@@ -40,8 +45,21 @@ fun getDataOffset(headerEnabled: Boolean): Int {
  *
  * @param view the View to change the visibility for
  */
-fun View.visible() {
-    if (!this.isVisible) {
+fun View.visibleIfInvisible() {
+    if (this.visibility == View.INVISIBLE) {
         this.visibility = View.VISIBLE
+    }
+}
+
+/**
+ * This extension function sets the visibility of a View to 'GONE' if it's not already gone.
+ * It takes a View parameter 'view' and checks if it's currently visible or invisible.
+ * If it is, the function sets its visibility to 'GONE'.
+ *
+ * @param view the View to change the visibility for
+ */
+fun View.goneIfVisibleOrInvisible() {
+    if (this.visibility != View.GONE) {
+        this.visibility = View.GONE
     }
 }
