@@ -22,7 +22,7 @@ class InsertTransaction<T>(
     override fun perform(transactional: Transactional<T>): Boolean {
         return with(transactional.data) {
             add(position, item) // Adds the item to the list at the specified position
-            val insertedPosition = position + if (headerEnabled) 1 else 0
+            val insertedPosition = if (headerEnabled) position + 1 else position
             transactional.notifyInserted(insertedPosition) // Notifies the inserted position
             true
         }
@@ -37,9 +37,15 @@ class InsertTransaction<T>(
      */
     override fun revert(transactional: Transactional<T>): Boolean {
         return with(transactional.data) {
-            val item = removeAt(position) // Removes the item from the list at the specified position
-            item?.let {
-                val removedPosition = position + if (headerEnabled) 1 else 0
-                transactional.notifyRemoved(removedPosition) // Notifies the removed position
-                true
+            if (position !in indices) {
+                return@with true
             }
+            val removedItem = removeAt(position) // Removes the item from the list at the specified position
+            removedItem?.let {
+                val removedPosition = if (headerEnabled) position + 1 else position
+                transactional.notifyRemoved(removedPosition) // Notifies the removed position
+            }
+            true
+        }
+    }
+}
