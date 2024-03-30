@@ -1,12 +1,12 @@
 // A data class representing the usage statistics of a model.
-data class Usage(
+data class ModelUsageStatistics(
 
     // The number of completion tokens used by the model.
-    val completion_tokens: Int,
+    val numberOfCompletionTokens: Int,
 
     // The number of prompt tokens used by the model.
-    val prompt_tokens: Int,
+    val numberOfPromptTokens: Int,
 
     // The total number of tokens used by the model.
-    val total_tokens: Int
+    val totalNumberOfTokens: Int
 )
