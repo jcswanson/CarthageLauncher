@@ -10,7 +10,7 @@ import com.codesteem.mylauncher.test.MonthsAdapter
  *
  * @property adapter The [MonthsAdapter] instance to interact with.
  */
-class ItemTouchHelperCallback(
+class MonthsAdapterCallback(
     private val adapter: MonthsAdapter
 ) : ItemTouchHelper.Callback() {
 
@@ -23,8 +23,8 @@ class ItemTouchHelperCallback(
         viewHolder: RecyclerView.ViewHolder
     ): Int {
         return ItemTouchHelper.Callback.makeMovementFlags(
-            ItemTouchHelper.ACTION_STATE_DRAG, // Allowing dragging
-            ItemTouchHelper.ACTION_STATE_SWIPE // Allowing swiping
+            ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.START or ItemTouchHelper.END,
+            ItemTouchHelper.ACTION_STATE_SWIPE
         )
     }
 
@@ -42,6 +42,18 @@ class ItemTouchHelperCallback(
         viewHolder: RecyclerView.ViewHolder,
         target: RecyclerView.ViewHolder
     ): Boolean {
-        Log.e("onMove", "onMove")
-        adapter.move(viewHolder.adapterPosition, target.adapterPosition)
+        Log.d("MonthsAdapter", "Item moved from position ${viewHolder.adapterPosition} to ${target.adapterPosition}")
+        adapter.onItemMoved(viewHolder.adapterPosition, target.adapterPosition)
+        return true
+    }
 
+    /**
+     * Called when an item is swiped in the [recyclerView]. This method logs the swipe event.
+     *
+     * @param viewHolder The [RecyclerView.ViewHolder] instance representing the swiped item.
+     * @param direction  The swipe direction.
+     */
+    override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+        Log.d("MonthsAdapter", "Item swiped from position ${viewHolder.adapterPosition}")
+    }
+}
