@@ -14,12 +14,11 @@ private const val INVALID_FLAG = -1
  * The class also supports header and footer items.
  * @author thesurix
  */
-class GestureManager private constructor(builder: Builder) {
-
-    /**
-     * Object that handles touch callbacks for the RecyclerView.
-     */
-    private val touchHelperCallback: GestureTouchHelperCallback
+class GestureManager private constructor(
+    private val touchHelperCallback: GestureTouchHelperCallback,
+    private val recyclerView: RecyclerView,
+    private val adapter: GestureAdapter<*, *>
+) {
 
     /**
      * Initializes a new instance of the GestureManager class with the provided builder.
@@ -27,86 +26,51 @@ class GestureManager private constructor(builder: Builder) {
      * @param builder Builder instance containing the configuration for the GestureManager
      */
     init {
-        val adapter = builder.recyclerView.adapter as GestureAdapter<Any, *>
-        touchHelperCallback = GestureTouchHelperCallback(adapter).apply {
-            swipeEnabled = builder.isSwipeEnabled
-            longPressDragEnabled = builder.isDragEnabled
-            manualDragEnabled = builder.isManualDragEnabled
-        }
+        recyclerView.adapter = adapter
+        ItemTouchHelper(touchHelperCallback).attachToRecyclerView(recyclerView)
+        adapter.setGestureListener(GestureListener(touchHelperCallback))
 
-        // Attaches the touch helper to the RecyclerView
-        val touchHelper = ItemTouchHelper(touchHelperCallback)
-        touchHelper.attachToRecyclerView(builder.recyclerView)
-
-        // Sets the gesture listener for the adapter
-        adapter.setGestureListener(GestureListener(touchHelper))
-
-        // Sets the swipe and drag flags based on the builder configuration
-        if (builder.swipeFlags == INVALID_FLAG) {
-            touchHelperCallback.setSwipeFlagsForLayout(builder.recyclerView.layoutManager!!)
-        } else {
-            touchHelperCallback.swipeFlags = builder.swipeFlags
-        }
-
-        if (builder.dragFlags == INVALID_FLAG) {
-            touchHelperCallback.setDragFlagsForLayout(builder.recyclerView.layoutManager!!)
-        } else {
-            touchHelperCallback.dragFlags = builder.dragFlags
-        }
-
-        // Sets the header and footer enabled flags for the adapter
-        adapter.setHeaderEnabled(builder.isHeaderEnabled)
-        adapter.setFooterEnabled(builder.isFooterEnabled)
+        setSwipeAndDragFlags()
+        setHeaderAndFooterFlags()
     }
 
     /**
-     * Returns true if swipe is enabled, false if swipe is disabled.
-     * @return swipe state
+     * Sets swipe and drag flags based on the builder configuration.
      */
-    /**
-     * Sets swipe gesture enabled or disabled.
-     * @param enabled true to enable, false to disable
-     */
-    var isSwipeEnabled: Boolean
-        get() = touchHelperCallback.isItemViewSwipeEnabled
-        set(enabled) {
-            touchHelperCallback.swipeEnabled = enabled
+    private fun setSwipeAndDragFlags() {
+        with(touchHelperCallback) {
+            swipeEnabled = builder.isSwipeEnabled
+            longPressDragEnabled = builder.isDragEnabled
+            manualDragEnabled = builder.isManualDragEnabled
+
+            if (builder.swipeFlags == INVALID_FLAG) {
+                setSwipeFlagsForLayout(recyclerView.layoutManager!!)
+            } else {
+                swipeFlags = builder.swipeFlags
+            }
+
+            if (builder.dragFlags == INVALID_FLAG) {
+                setDragFlagsForLayout(recyclerView.layoutManager!!)
+            } else {
+                dragFlags = builder.dragFlags
+            }
         }
+    }
 
     /**
-     * Returns true if long press drag is enabled, false if long press drag is disabled.
-     * @return long press drag state
+     * Sets header and footer enabled flags for the adapter.
      */
-    /**
-     * Sets long press drag gesture enabled or disabled.
-     * @param enabled true to enable, false to disable
-     */
-    var isLongPressDragEnabled: Boolean
-        get() = touchHelperCallback.isLongPressDragEnabled
-        set(enabled) {
-            touchHelperCallback.longPressDragEnabled = enabled
-        }
-
-    /**
-     * Returns true if manual drag is enabled, false if manual drag is disabled.
-     * @return manual drag state
-     */
-    /**
-     * Sets manual drag gesture enabled or disabled.
-     * @param enabled true to enable, false to disable
-     */
-    var isManualDragEnabled: Boolean
-        get() = touchHelperCallback.manualDragEnabled
-        set(enabled) {
-            touchHelperCallback.manualDragEnabled = enabled
-        }
+    private fun setHeaderAndFooterFlags() {
+        adapter.setHeaderEnabled(builder.isHeaderEnabled)
+        adapter.setFooterEnabled(builder.isFooterEnabled)
+    }
 
     /**
      * Class that builds [GestureManager] instance.
      * Constructs [GestureManager] for the given RecyclerView.
      * @param recyclerView RecyclerView instance
      */
-    class Builder(val recyclerView: RecyclerView) {
+    class Builder(private val recyclerView: RecyclerView) {
 
         /**
          * Flags for swipe gesture.
@@ -174,3 +138,50 @@ class GestureManager private constructor(builder: Builder) {
          * Sets long press drag gesture enabled or disabled.
          * Long press drag is disabled by default.
          * @param enabled true to enable, false to disable
+         * @return returns builder instance
+         */
+        fun setDragEnabled(enabled: Boolean): Builder {
+            isDragEnabled = enabled
+            return this
+        }
+
+        /**
+         * Sets manual drag gesture enabled or disabled.
+         * Manual drag is disabled by default.
+         * @param enabled true to enable, false to disable
+         * @return returns builder instance
+         */
+        fun setManualDragEnabled(enabled: Boolean): Builder {
+            isManualDragEnabled = enabled
+            return this
+        }
+
+        /**
+         * Sets header item enabled or disabled.
+         * Header is disabled by default.
+         * @param enabled true to enable, false to disable
+         * @return returns builder instance
+         */
+        fun setHeaderEnabled(enabled: Boolean): Builder {
+            isHeaderEnabled = enabled
+            return this
+        }
+
+        /**
+         * Sets footer item enabled or disabled.
+         * Footer is disabled by default.
+         * @param enabled true to enable, false to disable
+         * @return returns builder instance
+         */
+        fun setFooterEnabled(enabled: Boolean): Builder {
+            isFooterEnabled = enabled
+            return this
+        }
+
+        /**
+         * Sets swipe and drag flags.
+         * @param swipeFlags Flags for swipe gesture.
+         * @param dragFlags Flags for drag gesture.
+         * @return returns builder instance
+         */
+        fun setFlags(swipeFlags: Int, drag
