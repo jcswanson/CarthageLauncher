@@ -1,22 +1,23 @@
 /**
  * A class representing a header for a month in a calendar or launcher application.
- *
  * This class extends the [MonthItem] abstract class and overrides the [name] and [type] properties.
- * The [name] property represents the name of the month, while the [type] property is a constant
- * value of [MonthItem.MonthItemType.HEADER], indicating that this is a header item and not a regular
- * month item.
- *
- * The [openCounter] property is also overridden with a default value of 0, which could be used to
- * track the number of items or events open for that particular month.
- *
- * @property name The name of the month.
- * @property openCounter An integer value that could be used to track the number of items or events open for that particular month. The default value is 0.
  */
-class MonthHeader(override val name: String, override val openCounter: Int = 0) : MonthItem {
+class MonthHeader(name: String) : MonthItem(name, MonthItemType.HEADER, 0) {
 
     /**
-     * A constant value of [MonthItem.MonthItemType.HEADER], indicating that this is a header item and not a regular month item.
+     * An enum class representing the different types of month items.
      */
-    override val type: MonthItem.MonthItemType
-        get() = MonthItem.MonthItemType.HEADER
+    enum class MonthItemType {
+        REGULAR, HEADER
+    }
+
+    /**
+     * A data class representing a month item in a calendar or launcher application.
+     * This class is abstract and cannot be instantiated.
+     *
+     * @property name The name of the month or event.
+     * @property type The type of the month item.
+     * @property openCounter An integer value that can be used to track the number of items or events open for that particular month or event.
+     */
+    abstract class MonthItem(open val name: String, open val type: MonthItemType, var openCounter: Int)
 }
