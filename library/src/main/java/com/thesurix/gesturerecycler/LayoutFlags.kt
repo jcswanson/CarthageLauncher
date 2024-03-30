@@ -2,37 +2,23 @@ package com.thesurix.gesturerecycler
 
 import androidx.recyclerview.widget.*
 
-/**
- * Enum with predefined gesture flags for various layout managers, see [RecyclerView.LayoutManager]
- * This enum provides drag and swipe flags for [LinearLayoutManager], [GridLayoutManager],
- * and [StaggeredGridLayoutManager].
- *
- * @author thesurix
- */
-internal enum class LayoutFlags {
+internal abstract class LayoutFlagsAbstract {
+    internal abstract fun getDragFlags(layout: RecyclerView.LayoutManager?): Int
+    internal abstract fun getSwipeFlags(layout: RecyclerView.LayoutManager?): Int
+}
+
+internal enum class LayoutFlags : LayoutFlagsAbstract() {
     LINEAR {
-        /**
-         * Returns drag flags for a horizontal or vertical [LinearLayoutManager].
-         * 
-         * @param layout layout manager instance
-         * @return drag flags
-         */
-        override fun getDragFlags(layout: RecyclerView.LayoutManager): Int {
-            val linearLayout = layout as LinearLayoutManager
+        override fun getDragFlags(layout: RecyclerView.LayoutManager?): Int {
+            val linearLayout = layout as? LinearLayoutManager ?: return 0
             return when (linearLayout.orientation) {
                 LinearLayoutManager.HORIZONTAL -> ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
                 else -> ItemTouchHelper.UP or ItemTouchHelper.DOWN
             }
         }
 
-        /**
-         * Returns swipe flags for a horizontal or vertical [LinearLayoutManager].
-         * 
-         * @param layout layout manager instance
-         * @return swipe flags
-         */
-        override fun getSwipeFlags(layout: RecyclerView.LayoutManager): Int {
-            val linearLayout = layout as LinearLayoutManager
+        override fun getSwipeFlags(layout: RecyclerView.LayoutManager?): Int {
+            val linearLayout = layout as? LinearLayoutManager ?: return 0
             return when (linearLayout.orientation) {
                 LinearLayoutManager.HORIZONTAL -> ItemTouchHelper.UP
                 else -> ItemTouchHelper.RIGHT
@@ -40,69 +26,47 @@ internal enum class LayoutFlags {
         }
     },
     GRID {
-        /**
-         * Returns drag flags for a [GridLayoutManager] with any orientation.
-         *
-         * @param layout layout manager instance
-         * @return drag flags
-         */
-        override fun getDragFlags(layout: RecyclerView.LayoutManager): Int {
-            return ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
+        override fun getDragFlags(layout: RecyclerView.LayoutManager?): Int {
+            val gridLayout = layout as? GridLayoutManager ?: return 0
+            return if (gridLayout.spanCount == 1) {
+                getDragFlags(gridLayout.layoutManager as LinearLayoutManager)
+            } else {
+                ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
+            }
         }
 
-        /**
-         * Returns swipe flags for a [GridLayoutManager] with any orientation.
-         *
-         * @param layout layout manager instance
-         * @return swipe flags
-         */
-        override fun getSwipeFlags(layout: RecyclerView.LayoutManager): Int {
-            val gridLayout = layout as GridLayoutManager
-            return when (gridLayout.orientation) {
-                GridLayoutManager.HORIZONTAL -> ItemTouchHelper.UP or ItemTouchHelper.DOWN
-                else -> ItemTouchHelper.RIGHT
+        override fun getSwipeFlags(layout: RecyclerView.LayoutManager?): Int {
+            val gridLayout = layout as? GridLayoutManager ?: return 0
+            return if (gridLayout.spanCount == 1) {
+                getSwipeFlags(gridLayout.layoutManager as LinearLayoutManager)
+            } else {
+                when (gridLayout.orientation) {
+                    GridLayoutManager.HORIZONTAL -> ItemTouchHelper.UP or ItemTouchHelper.DOWN
+                    else -> ItemTouchHelper.RIGHT
+                }
             }
         }
     },
     STAGGERED {
-        /**
-         * Returns drag flags for a horizontal or vertical [StaggeredGridLayoutManager].
-         *
-         * @param layout layout manager instance
-         * @return drag flags
-         */
-        override fun getDragFlags(layout: RecyclerView.LayoutManager): Int {
-            return ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
+        override fun getDragFlags(layout: RecyclerView.LayoutManager?): Int {
+            val staggeredGridLayout = layout as? StaggeredGridLayoutManager ?: return 0
+            return if (staggeredGridLayout.spanCount == 1) {
+                getDragFlags(staggeredGridLayout.layoutManager as LinearLayoutManager)
+            } else {
+                ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
+            }
         }
 
-        /**
-         * Returns swipe flags for a horizontal or vertical [StaggeredGridLayoutManager].
-         *
-         * @param layout layout manager instance
-         * @return swipe flags
-         */
-        override fun getSwipeFlags(layout: RecyclerView.LayoutManager): Int {
-            val staggeredGridLayout = layout as StaggeredGridLayoutManager
-            return when (staggeredGridLayout.orientation) {
-                StaggeredGridLayoutManager.HORIZONTAL -> ItemTouchHelper.UP or ItemTouchHelper.DOWN
-                else -> ItemTouchHelper.RIGHT
+        override fun getSwipeFlags(layout: RecyclerView.LayoutManager?): Int {
+            val staggeredGridLayout = layout as? StaggeredGridLayoutManager ?: return 0
+            return if (staggeredGridLayout.spanCount == 1) {
+                getSwipeFlags(staggeredGridLayout.layoutManager as LinearLayoutManager)
+            } else {
+                when (staggeredGridLayout.orientation) {
+                    StaggeredGridLayoutManager.HORIZONTAL -> ItemTouchHelper.UP or ItemTouchHelper.DOWN
+                    else -> ItemTouchHelper.RIGHT
+                }
             }
         }
     };
-
-    /**
-     * Returns drag flags for the given layout manager.
-     *
-     * @param layout layout manager instance
-     * @return drag flags
-     */
-    internal abstract fun getDragFlags(layout: RecyclerView.LayoutManager): Int
-
-    /**
-     * Returns swipe flags for the given layout manager.
-     *
-     * @param layout layout manager instance
-     * @return swipe flags
-     */
-    internal abstract fun getSwipeFlags(layout: RecyclerView.LayoutManager): Int
 }
