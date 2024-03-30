@@ -5,24 +5,20 @@
  * (`DragEvent.ACTION_DRAG_ENDED`).
  */
 class DragListener : View.OnDragListener {
-  /**
-   * Called when a drag event is in progress. This method is responsible for handling the drag
-   * event and updating the view's visibility accordingly.
-   *
-   * @param view The view that is being dragged.
-   * @param dragEvent The drag event that is currently in progress.
-   * @return True if the drag event was handled, false otherwise.
-   */
-  override fun onDrag(view: View, dragEvent: DragEvent): Boolean {
-    when (dragEvent.action) {
-      // Hide the view when the drag event enters the view.
-      DragEvent.ACTION_DRAG_ENTERED -> view.visibility = View.INVISIBLE
 
-      // Show the view again when the drag event has ended.
-      DragEvent.ACTION_DRAG_ENDED -> view.visibility = View.VISIBLE
+    override fun onDrag(view: View, dragEvent: DragEvent): Boolean {
+        when (dragEvent.action) {
+            DragEvent.ACTION_DRAG_ENTERED -> handleDragEntered(view)
+            DragEvent.ACTION_DRAG_ENDED -> handleDragEnded(view)
+        }
+        return true
     }
 
-    // Return true to indicate that the drag event was handled.
-    return true
-  }
+    private fun handleDragEntered(view: View) {
+        view.visibility = View.INVISIBLE
+    }
+
+    private fun handleDragEnded(view: View) {
+        view.visibility = View.VISIBLE
+    }
 }
