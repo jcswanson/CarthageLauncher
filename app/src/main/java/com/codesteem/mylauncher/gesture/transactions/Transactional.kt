@@ -11,14 +11,28 @@ interface Transactional<T> {
      * This list is mutable, meaning that it can be modified directly.
      */
     val data: MutableList<T>
+        private set
 
     /**
-     * Notifies listeners that the data item at the specified position has changed.
-     * This method should be called when the data item at the given position has been modified.
+     * Notifies listeners that the data at the specified position has changed.
+     * This method should be called when the data at the given position has been modified.
      *
-     * @param position The position of the data item that has changed.
+     * @param position The position of the data that has changed.
      */
-    fun notifyChanged(position: Int)
+    fun notifyChanged(position: Int) {
+        onDataChanged(position, 1)
+    }
+
+    /**
+     * Notifies listeners that the data in the specified range has changed.
+     * This method should be called when multiple data items have been modified.
+     *
+     * @param startPosition The starting position of the range that has changed.
+     * @param itemCount The number of items in the changed range.
+     */
+    fun notifyChanged(startPosition: Int, itemCount: Int) {
+        onDataChanged(startPosition, itemCount)
+    }
 
     /**
      * Notifies listeners that a new data item has been inserted at the specified position.
@@ -26,22 +40,9 @@ interface Transactional<T> {
      *
      * @param position The position where the new data item has been inserted.
      */
-    fun notifyInserted(position: Int)
+    fun notifyInserted(position: Int) {
+        onDataChanged(position, 0, 1)
+    }
 
     /**
-     * Notifies listeners that the data item at the specified position has been removed.
-     * This method should be called when a data item has been removed from the list.
-     *
-     * @param position The position of the data item that has been removed.
-     */
-    fun notifyRemoved(position: Int)
 
-    /**
-     * Notifies listeners that the data item at the specified position has been moved to a new position.
-     * This method should be called when a data item has been moved within the list.
-     *
-     * @param fromPosition The original position of the data item.
-     * @param toPosition The new position of the data item.
-     */
-    fun notifyMoved(fromPosition: Int, toPosition: Int)
-}
