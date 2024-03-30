@@ -1,4 +1,4 @@
-package com.codesteem.mylauncher.receievers
+package com.codesteem.mylauncher.receivers
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -35,18 +35,35 @@ class ScreenReceiver : BroadcastReceiver() {
      * @param intent The [Intent] being received.
      */
     override fun onReceive(context: Context?, intent: Intent?) {
-        when (intent?.action) {
+        intent ?: return
+
+        when (intent.action) {
             Intent.ACTION_SCREEN_ON -> {
                 // Screen is turned on
                 Log.d("ScreenReceiver", "Screen ON")
-                // Send a broadcast with the new screen state
-                val screenStateChangedIntent = Intent(ACTION_SCREEN_STATE_CHANGED)
-                screenStateChangedIntent.putExtra(EXTRA_SCREEN_STATE, true)
-                context?.sendBroadcast(screenStateChangedIntent)
+                sendScreenStateChangedBroadcast(context, true)
                 // Add your code to handle screen ON event
             }
             Intent.ACTION_SCREEN_OFF -> {
                 // Screen is turned off
                 Log.d("ScreenReceiver", "Screen OFF")
-                // Send a broadcast with the new screen state
-                val screenStateChangedIntent = Intent(ACTION_SCREEN_STATE_CHANGED)
+                sendScreenStateChangedBroadcast(context, false)
+                // Add your code to handle screen OFF event
+            }
+        }
+    }
+
+    /**
+     * Sends a broadcast with the new screen state.
+     *
+     * @param context The [Context] to use to send the broadcast.
+     * @param isScreenOn The new screen state.
+     */
+    private fun sendScreenStateChangedBroadcast(context: Context?, isScreenOn: Boolean) {
+        context ?: return
+
+        val screenStateChangedIntent = Intent(ACTION_SCREEN_STATE_CHANGED)
+        screenStateChangedIntent.putExtra(EXTRA_SCREEN_STATE, isScreenOn)
+        context.sendBroadcast(screenStateChangedIntent)
+    }
+}
