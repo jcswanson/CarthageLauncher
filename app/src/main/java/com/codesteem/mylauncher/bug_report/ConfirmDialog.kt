@@ -5,15 +5,13 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.view.Window
 import com.codesteem.mylauncher.databinding.ConfirmDialogBinding
-import com.codesteem.mylauncher.databinding.LoadingDialogBinding
 
 class ConfirmDialog(
-    context: Context
-): Dialog(context) {
+    context: Context,
+    private val mListener: OnActionListener? = null
+) : Dialog(context) {
     private lateinit var binding: ConfirmDialogBinding
-    private var mListener: OnActionListener? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,19 +24,16 @@ class ConfirmDialog(
 
         binding.yes.setOnClickListener {
             mListener?.onOK()
+            dismiss()
         }
         binding.no.setOnClickListener {
             mListener?.onCancel()
+            dismiss()
         }
     }
 
     interface OnActionListener {
-        fun onOK()
-        fun onCancel()
+        abstract fun onOK()
+        abstract fun onCancel()
     }
-
-    fun setOnActionListener(listener: OnActionListener?) {
-        mListener = listener
-    }
-
 }
