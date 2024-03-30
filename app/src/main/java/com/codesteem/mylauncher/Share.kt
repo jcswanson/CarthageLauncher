@@ -4,15 +4,20 @@
 // and associated data to be shared.
 //
 // Properties:
-// - app: A string that specifies the name of the app to be shared.
-// - data: A string that contains the data to be shared with the app.
+// - appName: A non-empty string that specifies the name of the app to be shared.
+// - shareData: A non-null string that contains the data to be shared with the app.
 
 package com.codesteem.mylauncher
 
 data class Share(
     // The name of the app to be shared.
-    val app: String,
+    val appName: String,
 
     // The data to be shared with the app.
-    val data: String
-)
+    val shareData: String
+) {
+    init {
+        require(appName.isNotEmpty()) { "App name cannot be empty" }
+        require(shareData != null) { "Share data cannot be null" }
+    }
+}
