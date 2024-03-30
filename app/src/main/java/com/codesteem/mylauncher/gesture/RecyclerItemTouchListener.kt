@@ -5,12 +5,12 @@ import android.view.MotionEvent
 import androidx.recyclerview.widget.RecyclerView
 
 /**
- * Class that is responsible for handling item touch events.
- * Constructs [RecyclerView] touch listener.
+ * Class that is responsible for handling item touch events in a RecyclerView.
+ * Constructs a touch listener for item clicks, long presses, and double taps.
  * @param listener listener for item's click events
  * @author thesurix
  */
-class RecyclerItemTouchListener<T>(listener: ItemClickListener<T>) : RecyclerView.SimpleOnItemTouchListener() {
+class RecyclerItemTouchListener<T>(private val listener: ItemClickListener<T>) : RecyclerView.SimpleOnItemTouchListener() {
 
     private var gestureDetector: GestureDetector? = null
 
@@ -45,8 +45,14 @@ class RecyclerItemTouchListener<T>(listener: ItemClickListener<T>) : RecyclerVie
 
     private val gestureClickListener = GestureClickListener(listener)
 
+    /**
+     * Override the onInterceptTouchEvent method to detect touch events on the RecyclerView.
+     * Find the child view under the touch event coordinates and get its position.
+     * If the position is valid and the adapter is an instance of GestureAdapter,
+     * set the touched item and position for the gesture listener.
+     * Use the gesture detector to handle touch events and return the result.
+     */
     override fun onInterceptTouchEvent(view: RecyclerView, e: MotionEvent): Boolean {
-
         val childView = view.findChildViewUnder(e.x, e.y) ?: return false
         val childPosition = view.getChildAdapterPosition(childView)
         if (childPosition == RecyclerView.NO_POSITION) {
@@ -73,18 +79,33 @@ private class GestureClickListener<T> internal constructor(private val listener:
     private var item: T? = null
     private var viewPosition = 0
 
+    /**
+     * Called when a single tap is confirmed.
+     * If the touched item and position are set, call the onItemClick method of the listener.
+     */
     override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
         return item?.let { listener.onItemClick(it, viewPosition) } ?: false
     }
 
+    /**
+     * Called when a long press is detected.
+     * If the touched item and position are set, call the onItemLongPress method of the listener.
+     */
     override fun onLongPress(e: MotionEvent) {
         item?.let { listener.onItemLongPress(it, viewPosition) }
     }
 
+    /**
+     * Called when a double tap is detected.
+     * If the touched item and position are set, call the onDoubleTap method of the listener.
+     */
     override fun onDoubleTap(e: MotionEvent): Boolean {
         return item?.let { listener.onDoubleTap(it, viewPosition) } ?: false
     }
 
+    /**
+     * Set the touched item and position for the gesture listener.
+     */
     internal fun setTouchedItem(item: T, viewPosition: Int) {
         this.item = item
         this.viewPosition = viewPosition
