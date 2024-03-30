@@ -1,17 +1,41 @@
-/**
- * This class, `ExampleUnitTest`, contains a single example local unit test which will execute on the development machine (host). 
- *
- * The purpose of this test is to verify that the addition function is working correctly. Specifically, it checks that the sum of 2 + 2 is equal to 4.
- *
- * Unit tests are an important part of the development process, as they help ensure that individual components of the code are functioning correctly.
- * By writing tests for specific functionality, developers can catch and fix bugs early on, reducing the overall complexity and maintenance of the codebase.
- *
- * For more information on unit testing in Android, please refer to the official documentation:
- * [testing documentation](http://d.android.com/tools/testing).
- */
+import org.junit.Assert.assertEquals
+import org.junit.Test
+
 class ExampleUnitTest {
+
     @Test
-    fun addition_isCorrect() {
-        assertEquals(4, 2 + 2)
+    fun additionIsCorrect() {
+        // Perform the addition
+        val sum = 2 + 2
+
+        // Verify the result
+        assertEquals(4, sum)
+    }
+
+    @Test
+    fun subtractionIsCorrect() {
+        // Perform the subtraction
+        val difference = 4 - 2
+
+        // Verify the result
+        assertEquals(2, difference)
+    }
+
+    @Test
+    fun multiplicationIsCorrect() {
+        // Perform the multiplication
+        val product = 2 * 2
+
+        // Verify the result
+        assertEquals(4, product)
+    }
+
+    @Test
+    fun divisionIsCorrect() {
+        // Perform the division
+        val quotient = 4.0 / 2.0
+
+        // Verify the result
+        assertEquals(2.0, quotient, 0.001)
     }
 }
