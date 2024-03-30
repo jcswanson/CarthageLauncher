@@ -10,5 +10,39 @@ import androidx.appcompat.app.AppCompatDelegate
  */
 class ThemeSettings private constructor(context: Context) {
 
-    /**
+    init {
+        AppCompatDelegate.setDefaultNightMode(getNightMode())
+    }
 
+    companion object {
+        private const val NIGHT_MODE_KEY = "night_mode"
+
+        @Volatile
+        private var INSTANCE: ThemeSettings? = null
+
+        fun getInstance(context: Context): ThemeSettings {
+            return INSTANCE ?: synchronized(this) {
+                val themeSettings = ThemeSettings(context)
+                INSTANCE = themeSettings
+                themeSettings
+            }
+        }
+
+        fun saveNightMode(nightMode: Int) {
+            getInstance(App.instance).savePrivatePreference(NIGHT_MODE_KEY, nightMode)
+        }
+
+        fun getNightMode(): Int {
+            return getInstance(App.instance).getPrivatePreference(NIGHT_MODE_KEY, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+        }
+    }
+
+    private fun savePrivatePreference(key: String, value: Int) {
+        // Save the preference using the SharedPreferences object
+    }
+
+    private fun getPrivatePreference(key: String, defaultValue: Int): Int {
+        // Retrieve the preference using the SharedPreferences object
+        return defaultValue
+    }
+}
