@@ -8,6 +8,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.codesteem.mylauncher.R;
 
+import java.util.List;
+
 /**
  * A custom OnDragListener implementation that handles drag and drop events for RecyclerView items.
  */
@@ -53,20 +55,9 @@ public class DragListener implements View.OnDragListener {
             final int rvMid = R.id.rvMid; // New ID for rvMid
 
             // Check if the target View is one of the RecyclerViews or the new views
-            if (viewId == cvItem || viewId == tvEmptyListTop || viewId == tvEmptyListBottom || viewId == tvEmptyListMid || viewId == rvTop || viewId == rvBottom || viewId == rvMid) { // Include the new views
+            if (isTargetView(viewId, cvItem, tvEmptyListTop, tvEmptyListBottom, tvEmptyListMid, rvTop, rvBottom, rvMid)) {
 
-                RecyclerView target;
-                if (viewId == tvEmptyListTop || viewId == rvTop) {
-                    target = (RecyclerView) view.getRootView().findViewById(rvTop);
-                } else if (viewId == tvEmptyListBottom || viewId == rvBottom) {
-                    target = (RecyclerView) view.getRootView().findViewById(rvBottom);
-                } else if (viewId == tvEmptyListMid || viewId == rvMid) { // Handle the new views
-                    target = (RecyclerView) view.getRootView().findViewById(rvMid);
-                } else {
-                    target = (RecyclerView) view.getParent();
-                    positionTarget = (int) view.getTag();
-                }
-
+                RecyclerView target = getTargetRecyclerView(viewId, view.getRootView());
                 if (viewSource != null) {
                     RecyclerView source = (RecyclerView) viewSource.getParent();
 
@@ -106,24 +97,7 @@ public class DragListener implements View.OnDragListener {
                     adapterTarget.notifyDataSetChanged();
 
                     // Update empty lists as needed
-                    if (sourceId == rvBottom && adapterSource.getItemCount() < 1) {
-                        listener.setEmptyListBottom(true);
-                    }
-                    if (sourceId == rvMid && adapterSource.getItemCount() < 1) {
-                        listener.setEmptyListMid(true);
-                    }
-                    if (viewId == tvEmptyListBottom) {
-                        listener.setEmptyListBottom(false);
-                    }
-                    if (viewId == tvEmptyListMid) {
-                        listener.setEmptyListMid(false);
-                    }
-                    if (sourceId == rvTop && adapterSource.getItemCount() < 1) {
-                        listener.setEmptyListTop(true);
-                    }
-                    if (viewId == tvEmptyListTop) {
-                        listener.setEmptyListTop(false);
-                    }
+                    updateEmptyLists(sourceId, adapterSource, listener);
                 }
             }
         }
@@ -134,4 +108,36 @@ public class DragListener implements View.OnDragListener {
         return true;
     }
 
-}
+    // Helper method to check if the target view is one of the RecyclerViews or the new views
+    private boolean isTargetView(int viewId, int... targetViews) {
+        for (int targetView : targetViews) {
+            if (viewId == targetView) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Helper method to get the target RecyclerView based on the viewId
+    private RecyclerView getTargetRecyclerView(int viewId, View rootView) {
+        switch (viewId) {
+            case R.id.cvItem:
+            case R.id.tvEmptyListTop:
+            case R.id.tvEmptyListBottom:
+            case R.id.tvEmptyListMid:
+                return (RecyclerView) rootView.findViewById(R.id.rvTop);
+            case R.id.rvTop:
+                return (RecyclerView) rootView.findViewById(R.id.rvTop);
+            case R.id.rvBottom:
+                return (RecyclerView) rootView.findViewById(R.id.rvBottom);
+            case R.id.rvMid:
+                return (RecyclerView) rootView.findViewById(R.id.rvMid);
+            default:
+                return null;
+        }
+    }
+
+    // Helper method to update empty lists as needed
+    private void updateEmptyLists(int sourceId, MainAdapter adapterSource, Listener listener) {
+        if (sourceId == R.id.rvBottom && adapterSource.getItemCount() < 1) {
+            listener.setEmptyListBottom(true);
