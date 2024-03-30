@@ -2,7 +2,7 @@
 interface NotificationDao {
 
     /**
-     * Queries the notification_table to retrieve a notification entity with the specified notificationId.
+     * Queries the notification\_table to retrieve a notification entity with the specified notificationId.
      *
      * @param notificationId The unique identifier of the notification entity to retrieve.
      * @return The notification entity with the specified notificationId, or null if no such entity exists.
@@ -11,5 +11,11 @@ interface NotificationDao {
     suspend fun getNotificationById(notificationId: String): NotificationEntity?
 
     /**
-     * Deletes a notification entity with the specified notificationId from the notification_table.
-    
+     * Deletes a notification entity with the specified notificationId from the notification\_table.
+     *
+     * @param notificationId The unique identifier of the notification entity to delete.
+     * @return The number of deleted entities.
+     */
+    @Delete
+    suspend fun deleteNotificationById(notificationId: NotificationEntity): Int
+}
