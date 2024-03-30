@@ -1,12 +1,12 @@
 // ViewModel for the main activity
 @HiltViewModel
 class MainViewModel @Inject constructor (
-    application: Application, // Application instance for getting the database instance
-    private val mainRepo: MainRepository // Repository for handling data operations
-): AndroidViewModel(application) {
+    private val mainRepository: MainRepository,
+    application: Application
+) : AndroidViewModel(application) {
 
-    // Notification DAO for database operations
     private val notificationDao: NotificationDao
+    private val gson = Gson()
 
     // State flow for storing all notifications
     private val _allNotificationsState = MutableStateFlow<List<NotificationEntity>>(emptyList())
@@ -21,50 +21,39 @@ class MainViewModel @Inject constructor (
     val askPerplexityState = _askPerplexityState.asStateFlow()
 
     init {
-        // Get the database instance and initialize the notification DAO
         val database = NotificationDatabase.getDatabase(application)
         notificationDao = database.notificationDao()
 
-        // Launch a coroutine to collect the perplexity flow from the repository
         viewModelScope.launch {
-            mainRepo.perplexityFlow.collectLatest { result ->
-                Log.e("viewModelString", result.toString())
+            mainRepository.perplexityFlow.collectLatest { result ->
                 if (result != null) {
-                    // Parse the JSON result and emit the success state
-                    val gson = Gson()
                     val json = gson.fromJson(result, PerplexityResponse::class.java)
                     _askPerplexityState.emit(Resource.Success(json))
-                    Log.e("viewModel", json.toString())
                 }
             }
         }
     }
 
-    // Function to ask perplexity with a given content
     fun askPerplexity(content: String) = viewModelScope.launch {
-        _askPerplexityState.emit(Resource.Loading()) // Emit loading state before making the API call
-        mainRepo.askPerplexity(PerplexityRequest().copy(messages = listOf(Message(), Message("user", content)))) // Make the API call
+        _askPerplexityState.emit(Resource.Loading())
+        mainRepository.askPerplexity(PerplexityRequest(listOf(Message(), Message("user", content))))
     }
 
-    // Function to delete all notifications
     fun deleteAllNotifications() = viewModelScope.launch {
-        notificationDao.deleteAllNotifications() // Delete all notifications from the database
-        getNotifications() // Fetch all notifications after deletion
+        mainRepository.deleteAllNotifications()
+        getNotifications()
     }
 
-    // Function to delete a notification with a given id
     fun deleteNotification(notificationId: String) = viewModelScope.launch {
-        notificationDao.deleteNotificationById(notificationId) // Delete the notification with the given id
-        _deleteNotificationsState.emit(Resource.Success(Random.nextInt())) // Emit success state with a random integer
+        mainRepository.deleteNotificationById(notificationId)
+        _deleteNotificationsState.emit(Resource.Success(Random.nextInt()))
     }
 
-    // Function to get prioritized notifications
     fun getPrioritizedNotifications() = viewModelScope.launch {
-        _allNotificationsState.emit(notificationDao.getPrioritizedNotifications()) // Emit the prioritized notifications
+        _allNotificationsState.emit(notificationDao.getPrioritizedNotifications())
     }
 
-    // Function to get all notifications
     fun getNotifications() = viewModelScope.launch {
-        _allNotificationsState.emit(notificationDao.getAllNotifications()) // Emit all notifications from the database
+        _allNotificationsState.emit(notificationDao.getAllNotifications())
     }
 }
