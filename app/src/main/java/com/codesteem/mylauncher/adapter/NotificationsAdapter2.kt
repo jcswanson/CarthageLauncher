@@ -5,38 +5,42 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
-import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.service.notification.StatusBarNotification
+import android.text.format.DateUtils
 import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.core.app.NotificationCompat
-import androidx.core.graphics.drawable.toBitmap
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.codesteem.mylauncher.R
 import com.codesteem.mylauncher.databinding.ItemNotificationBinding
 import com.codesteem.mylauncher.models.AppInfo
 import com.codesteem.mylauncher.models.NotificationsModel
 import com.codesteem.mylauncher.util.ItemTouchHelperAdapter
 import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 /**
- * NotificationsAdapter2 is a RecyclerView adapter for displaying a list of notifications.
+ * NotificationsAdapter is a RecyclerView adapter for displaying a list of notifications.
  * It extends ListAdapter, which provides a standard way of handling data updates and diffing.
  * The adapter also implements ItemTouchHelperAdapter, allowing it to handle swipe-to-dismiss gestures.
  */
-class NotificationsAdapter2(
+class NotificationsAdapter(
     private val onItemDeleteListener: OnItemDeleteListener
-) : ListAdapter<NotificationsModel, NotificationsAdapter2.NotificationsViewHolder>(
+) : ListAdapter<NotificationsModel, NotificationsAdapter.NotificationsViewHolder>(
     NotificationItemCallBack()
 ), ItemTouchHelperAdapter {
 
@@ -49,8 +53,8 @@ class NotificationsAdapter2(
             oldItem: NotificationsModel,
             newItem: NotificationsModel
         ): Boolean {
-            // Compares the time field of NotificationsModel objects to determine if they represent the same item.
-            return oldItem.time == newItem.time
+            // Compares the id field of NotificationsModel objects to determine if they represent the same item.
+            return oldItem.id == newItem.id
         }
 
         override fun areContentsTheSame(
@@ -134,5 +138,4 @@ class NotificationsAdapter2(
                 // Binds the title, desc, time, app_name, and app_icon fields of the NotificationsModel object to the corresponding views.
                 binding.tvName.text = notiModel.title
                 binding.tvType.text = notiModel.desc
-                binding.tvTime.text = "• " + notiModel.app_name + " • " + notiModel.time
-                binding
+                binding.
