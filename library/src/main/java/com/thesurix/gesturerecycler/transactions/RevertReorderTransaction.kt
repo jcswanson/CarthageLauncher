@@ -10,31 +10,37 @@
  *
  * @author thesurix
  */
-class RevertReorderTransaction<T>(private val from: Int,
-                                  private val to: Int,
-                                  private val headerEnabled: Boolean) : Transaction<T> {
+class RevertReorderTransaction<T>(
+    private val from: Int,
+    private val to: Int,
+    private val headerEnabled: Boolean
+) : Transaction<T> {
 
-    /**
-     * Performs the revert reorder transaction, but does nothing in this implementation.
-     * This method is provided for compatibility with the [Transaction] interface.
-     *
-     * @param transactional The [Transactional] object that will be used to perform the transaction.
-     * @return false, as this method does not modify the list.
-     */
-    override fun perform(transactional: Transactional<T>) = false
+    override fun perform(transactional: Transactional<T>): Boolean {
+        // Perform the reorder transaction
+        transactional.data.add(to, transactional.data.removeAt(from))
+        if (headerEnabled) {
+            transactional.notifyRemoved(from + 1)
+            transactional.notifyAdded(to + 1)
+        } else {
+            transactional.notifyRemoved(from)
+            transactional.notifyAdded(to)
+        }
+        return true
+    }
 
-    /**
-     * Reverts the previous reorder transaction, restoring the original order of the items in the list.
-     * This method removes the item at the current index, and inserts it back at its original position.
-     *
-     * @param transactional The [Transactional] object that will be used to perform the transaction.
-     * @return true if the transaction was successful, false otherwise.
-     */
     override fun revert(transactional: Transactional<T>): Boolean {
         return with(transactional.data) {
-            // Remove the item at the current index
-            val item = removeAt(to)
-            // If the item was not null, insert it back at its original position
-            item?.let {
-                transactional.notifyRemoved(to + if (headerEnabled) 1 else 0)
-                add(from, it
+            // Revert the reorder transaction
+            add(from, removeAt(to))
+            if (headerEnabled) {
+                transactional.notifyAdded(from + 1)
+                transactional.notifyRemoved(to + 1)
+            } else {
+                transactional.notifyAdded(from)
+                transactional.notifyRemoved(to)
+            }
+            return true
+        }
+    }
+}
