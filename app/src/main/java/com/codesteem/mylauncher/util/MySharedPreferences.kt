@@ -1,6 +1,7 @@
 package com.codesteem.mylauncher.util
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.util.Log
 import com.codesteem.mylauncher.models.NotificationsModel
 import com.codesteem.mylauncher.models.UserInfo
@@ -9,109 +10,71 @@ import com.google.gson.reflect.TypeToken
 
 object MySharedPreferences {
 
-    // SharedPreferences file name
     private const val PREF_NAME = "MyPref"
+    private const val NOTIFICATIONS_KEY = "notifications"
+    private const val USER_INFO_KEY = "user_info"
+    private const val PRIORITIZED_APPS_KEY = "prioritized_apps"
 
-    // Keys for different data items stored in SharedPreferences
-    private const val KEY_STRING_LIST = "string_list"
-    private const val KEY_STRING_LIST_ALL = "string_list_all"
-    const val KEY_USER_IMAGE = "user_image"
-    const val KEY_USER_NAME = "user_name"
-    const val KEY_PHONE = "phone"
-    const val KEY_EMAIL = "email"
-    const val KEY_WHATSAPP = "whatsapp"
-    const val KEY_INSTAGRAM = "instagram"
-    const val KEY_MESSENGER = "messenger"
-    const val KEY_SNAPCHAT = "snapchat"
-    const val KEY_X = "x"
-    const val KEY_DISCORD_NOW = "discord_now"
+    private fun getSharedPreferences(context: Context): SharedPreferences {
+        return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+    }
 
-    // Keys for storing notification-related data
-    private const val KEY_NOTIFICATIONS = "notifications"
-    private const val FIVE_TAPS_HINT = "five_taps_hint"
-    const val KEY_PRIORITIZED = "key_prioritized"
-    const val SEARCH_COPY_HINT = "search_copy_hint"
-    const val KEY_IS_PRIORITY_ACTIVE = "key_is_priority_active"
-    const val KEY_NOTIFICATIONS_INTERVAL = "key_notifications_interval"
-    const val KEY_NOTIFICATION_TIMESTAMP = "key_notification_timestamp"
-    const val KEY_IS_SHOWN_COPY_TEXT_HELP = "key_copy_text_help_shown"
-
-    // Functions for getting and saving notification timestamp
-    fun getNotificationTimeStamp(context: Context): Long {
-        val sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-        return sharedPreferences.getLong(KEY_NOTIFICATION_TIMESTAMP, 0L)
+    private fun getGson(): Gson {
+        return Gson()
     }
 
     fun saveNotificationTimeStamp(context: Context, timeStamp: Long) {
-        val sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-        sharedPreferences.edit().putLong(KEY_NOTIFICATION_TIMESTAMP, timeStamp).apply()
+        getSharedPreferences(context).edit().putLong(NOTIFICATIONS_KEY, timeStamp).apply()
     }
 
-    // Function for getting and saving the status of the "copy text" help balloon
-    fun getCopeTextHelpStatus(context: Context): Boolean {
-        val sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-        return sharedPreferences.getBoolean(KEY_IS_SHOWN_COPY_TEXT_HELP, false)
+    fun getNotificationTimeStamp(context: Context): Long {
+        return getSharedPreferences(context).getLong(NOTIFICATIONS_KEY, 0L)
     }
 
-    fun saveCopeTextHelpStatus(context: Context, isShown: Boolean) {
-        val sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-        sharedPreferences.edit().putBoolean(KEY_IS_SHOWN_COPY_TEXT_HELP, isShown).apply()
+    fun saveUserInfo(context: Context, userInfo: UserInfo) {
+        val gson = getGson()
+        val json = gson.toJson(userInfo)
+        getSharedPreferences(context).edit().putString(USER_INFO_KEY, json).apply()
     }
 
-    // Functions for getting and saving notification interval
-    fun getNotificationInterval(context: Context): Int {
-        val sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-        return sharedPreferences.getInt(KEY_NOTIFICATIONS_INTERVAL, 0)
+    fun getUserInfo(context: Context): UserInfo? {
+        val gson = getGson()
+        val json = getSharedPreferences(context).getString(USER_INFO_KEY, null)
+        if (json == null) {
+            return null
+        }
+        return gson.fromJson(json, UserInfo::class.java)
     }
 
-    fun saveNotificationsInterval(context: Context, interval: Int) {
-        val sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-        sharedPreferences.edit().putInt(KEY_NOTIFICATIONS_INTERVAL, interval).apply()
+    fun savePrioritizedApps(context: Context, apps: List<String>) {
+        val gson = getGson()
+        val json = gson.toJson(apps)
+        getSharedPreferences(context).edit().putString(PRIORITIZED_APPS_KEY, json).apply()
     }
 
-    // Function for getting and setting priority mode
-    fun getPriorityMode(context: Context): Boolean {
-        val sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-        return sharedPreferences.getBoolean(KEY_IS_PRIORITY_ACTIVE, false)
+    fun getPrioritizedApps(context: Context): List<String> {
+        val gson = getGson()
+        val json = getSharedPreferences(context).getString(PRIORITIZED_APPS_KEY, "[]")
+        val type = object : TypeToken<List<String>>() {}.type
+        return gson.fromJson(json, type)
     }
 
-    fun savePriority(isActive: Boolean, context: Context) {
-        val sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-        sharedPreferences.edit().putBoolean(KEY_IS_PRIORITY_ACTIVE, isActive).apply()
-    }
-
-    // Functions for managing prioritized apps
     fun isPrioritized(app: String, context: Context): Boolean {
-        val currentList = getPrioritized(context).toMutableList()
-        return currentList.contains(app)
+        return getPrioritizedApps(context).contains(app)
     }
 
-    fun savePriorities(list: List<String>, context: Context) {
-        val sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-        editor.putStringSet(KEY_PRIORITIZED, list.toSet())
-        editor.apply()
-    }
-
-    fun removePriority(priority: String, context: Context) {
-        val currentList = getPrioritized(context).toMutableList()
-        if (currentList.contains(priority)) {
-            currentList.remove(priority)
-            savePriorities(currentList, context)
+    fun savePriority(app: String, context: Context, isActive: Boolean) {
+        val currentList = getPrioritizedApps(context)
+        if (isActive) {
+            if (!currentList.contains(app)) {
+                currentList.add(app)
+                savePrioritizedApps(context, currentList)
+            }
+        } else {
+            if (currentList.contains(app)) {
+                currentList.remove(app)
+                savePrioritizedApps(context, currentList)
+            }
         }
     }
-
-    fun savePriority(priority: String, context: Context) {
-        val currentList = getPrioritized(context).toMutableList()
-        if (!currentList.contains(priority)) {
-            currentList.add(priority)
-            savePriorities(currentList, context)
-        }
-    }
-
-    fun getPrioritized(context: Context): List<String> {
-        val sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-        return sharedPreferences.getStringSet(KEY_PRIORITIZED, setOf())?.toList() ?: emptyList()
-    }
-
-   
+}
