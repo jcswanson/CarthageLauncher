@@ -9,30 +9,33 @@ import android.os.Parcelable;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-public class PersistentPendingIntent implements Parcelable
-{
-    private enum PendingIntentType{SERVICE, BROADCAST, ACTIVITY}
+import java.util.Objects;
+
+public final class PersistentPendingIntent implements Parcelable {
+    private enum PendingIntentType {
+        SERVICE,
+        BROADCAST,
+        ACTIVITY
+    }
+
     @NonNull
     private final PendingIntentType pendingIntentType;
-    protected final int requestCode;
-    protected final int flags;
+    private final int requestCode;
+    private final int flags;
     @NonNull
-    protected final Intent intent;
+    private final Intent intent;
 
-    private PersistentPendingIntent(@NonNull PendingIntentType pendingIntentType, int requestCode, @NonNull Intent intent, int flags)
-    {
-        this.pendingIntentType = pendingIntentType;
-        this.flags = flags;
-        this.intent = intent;
-        this.requestCode = requestCode;
+    private PersistentPendingIntent(@NonNull Builder builder) {
+        this.pendingIntentType = builder.pendingIntentType;
+        this.requestCode = builder.requestCode;
+        this.flags = builder.flags;
+        this.intent = Objects.requireNonNull(builder.intent);
     }
 
     @Nullable
-    public PendingIntent getPendingIntent(@NonNull Context context)
-    {
+    public PendingIntent getPendingIntent(@NonNull Context context) {
         PendingIntent pendingIntent = null;
-        switch (pendingIntentType)
-        {
+        switch (pendingIntentType) {
             case SERVICE:
                 pendingIntent = PendingIntent.getService(context, requestCode, intent, flags);
                 break;
@@ -46,39 +49,39 @@ public class PersistentPendingIntent implements Parcelable
         return pendingIntent;
     }
 
-
-    public static PersistentPendingIntent getService(int requestCode, @NonNull Intent intent, int flags)
-    {
-        return new PersistentPendingIntent(PendingIntentType.SERVICE, requestCode, intent, flags);
+    @NonNull
+    public static Builder builder(@NonNull PendingIntentType pendingIntentType, int requestCode, @NonNull Intent intent, int flags) {
+        return new Builder(pendingIntentType, requestCode, intent, flags);
     }
 
-    public static PersistentPendingIntent getActivity(int requestCode, @NonNull Intent intent, int flags)
-    {
-        return new PersistentPendingIntent(PendingIntentType.ACTIVITY, requestCode, intent, flags);
+    public static final class Builder {
+        @NonNull
+        private final PendingIntentType pendingIntentType;
+        private final int requestCode;
+        private final int flags;
+        @NonNull
+        private Intent intent;
+
+        private Builder(@NonNull PendingIntentType pendingIntentType, int requestCode, @NonNull Intent intent, int flags) {
+            this.pendingIntentType = pendingIntentType;
+            this.requestCode = requestCode;
+            this.intent = intent;
+            this.flags = flags;
+        }
+
+        @NonNull
+        public Builder setIntent(@NonNull Intent intent) {
+            this.intent = Objects.requireNonNull(intent);
+            return this;
+        }
+
+        @NonNull
+        public PersistentPendingIntent build() {
+            return new PersistentPendingIntent(this);
+        }
     }
 
-    public static PersistentPendingIntent getBroadcast(int requestCode, @NonNull Intent intent, int flags)
-    {
-        return new PersistentPendingIntent(PendingIntentType.BROADCAST, requestCode, intent, flags);
-    }
-
-    @Override
-    public int describeContents()
-    {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags)
-    {
-        dest.writeInt(this.pendingIntentType.ordinal());
-        dest.writeInt(this.requestCode);
-        dest.writeInt(this.flags);
-        dest.writeParcelable(this.intent, flags);
-    }
-
-    protected PersistentPendingIntent(Parcel in)
-    {
+    private PersistentPendingIntent(Parcel in) {
         int tmpPendingIntentType = in.readInt();
         this.pendingIntentType = PendingIntentType.values()[tmpPendingIntentType];
         this.requestCode = in.readInt();
@@ -86,18 +89,56 @@ public class PersistentPendingIntent implements Parcelable
         this.intent = in.readParcelable(Intent.class.getClassLoader());
     }
 
-    public static final Creator<PersistentPendingIntent> CREATOR = new Creator<PersistentPendingIntent>()
-    {
-        @Override
-        public PersistentPendingIntent createFromParcel(Parcel source)
-        {
-            return new PersistentPendingIntent(source);
-        }
+    @Override
+    public int describeContents() {
+        return 0;
+    }
 
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(this.pendingIntentType.ordinal());
+        dest.writeInt(this.requestCode);
+        dest.writeInt(this.flags);
+        dest.writeParcelable(this.intent, flags);
+    }
+
+    @SuppressWarnings("unused")
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PersistentPendingIntent)) return false;
+        PersistentPendingIntent that = (PersistentPendingIntent) o;
+        return getRequestCode() == that.getRequestCode() &&
+                getFlags() == that.getFlags() &&
+                pendingIntentType == that.pendingIntentType &&
+                Objects.equals(getIntent(), that.getIntent());
+    }
+
+    @SuppressWarnings("unused")
+    @Override
+    public int hashCode() {
+        return Objects.hash(pendingIntentType, getRequestCode(), getFlags(), getIntent());
+    }
+
+    @NonNull
+    public PendingIntentType getPendingIntentType() {
+        return pendingIntentType;
+    }
+
+    public int getRequestCode() {
+        return requestCode;
+    }
+
+    public int getFlags() {
+        return flags;
+    }
+
+    @NonNull
+    public Intent getIntent() {
+        return intent;
+    }
+
+    public static final Creator<PersistentPendingIntent> CREATOR = new Creator<PersistentPendingIntent>() {
         @Override
-        public PersistentPendingIntent[] newArray(int size)
-        {
-            return new PersistentPendingIntent[size];
-        }
-    };
-}
+        public PersistentPendingIntent createFromParcel(Parcel in) {
+            return new PersistentPendingIntent(in
