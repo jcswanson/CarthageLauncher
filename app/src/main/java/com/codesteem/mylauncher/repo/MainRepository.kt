@@ -1,5 +1,3 @@
-package com.codesteem.mylauncher.repo
-
 import com.codesteem.mylauncher.BuildConfig
 import com.codesteem.mylauncher.data.remote.PerplexityRequest
 import com.google.gson.Gson
@@ -22,8 +20,15 @@ class MainRepository @Inject constructor(
     private val _perplexityFlow = MutableStateFlow<String?>(null)
     val perplexityFlow = _perplexityFlow.asStateFlow()
 
+    private val client = OkHttpClient.Builder()
+        .connectTimeout(100, TimeUnit.SECONDS)
+        .readTimeout(10, TimeUnit.MINUTES)
+        .writeTimeout(10, TimeUnit.MINUTES)
+        .build()
 
-    fun askPerplexity(perplexityRequest: PerplexityRequest){
+    private val gson = Gson()
+
+    fun askPerplexity(perplexityRequest: PerplexityRequest) {
         val eventSourceListener = object : EventSourceListener() {
             override fun onOpen(eventSource: EventSource, response: Response) {
                 println("Connection opened")
@@ -54,12 +59,7 @@ class MainRepository @Inject constructor(
             }
         }
 
-        val requestBody = Gson().toJson(perplexityRequest).toRequestBody("application/json".toMediaTypeOrNull())
-
-        val client = OkHttpClient.Builder().connectTimeout(100, TimeUnit.SECONDS)
-            .readTimeout(10, TimeUnit.MINUTES)
-            .writeTimeout(10, TimeUnit.MINUTES)
-            .build()
+        val requestBody = gson.toJson(perplexityRequest).toRequestBody("application/json".toMediaTypeOrNull())
 
         val sseRequest = Request.Builder()
             .url("https://api.perplexity.ai/chat/completions")
@@ -70,7 +70,6 @@ class MainRepository @Inject constructor(
 
         val eventSource = EventSources.createFactory(client)
             .newEventSource(sseRequest, eventSourceListener)
-
 
         eventSource.request()
     }
