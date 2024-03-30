@@ -1,23 +1,27 @@
-package com.thesurix.gesturerecycler;
+package com.thesurix.gesturerecycler
 
-import com.thesurix.gesturerecycler.transactions.Transactional;
-import org.junit.Before;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import com.thesurix.gesturerecycler.transactions.Transactional
+import org.junit.Before
+import org.junit.runners.MockitoJUnitRunner
+import org.mockito.Mock
+import org.mockito.Mockito
+import org.mockito.junit.MockitoJUnitRunner
 
-@RunWith(MockitoJUnitRunner.class) // This annotation is used to run this test class with Mockito JUnit Runner
+@RunWith(MockitoJUnitRunner::class) // Use Mockito JUnit Runner to initialize mock objects
 abstract class BaseTransactionTest {
 
-    @Mock // This annotation indicates that the following variable should be mock object
-    lateinit var transactional: Transactional<String> // A mock object that implements the Transactional interface for String type
+    @Mock
+    private lateinit var transactional: Transactional<String> // Use private access modifier for better encapsulation
 
-    val data = mutableListOf("A", "B", "C", "D", "E") // A mutable list of Strings
+    private val data = mutableListOf("A", "B", "C", "D", "E") // Use private access modifier for better encapsulation
 
-    @Before // This annotation indicates that the following method should be run before each test method
+    @Before
     fun setUp() {
-        Mockito.`when`(transactional.data) // This line sets up a behavior for the mock object
-            .thenReturn(data) // When the data property of the mock object is accessed, return the data list
+        Mockito.`when`(transactional.data)
+            .thenReturn(data)
     }
+
+    protected fun <T> any(): T = Mockito.any<T>() // Define a utility function to create a mockito any() object
+
+    protected fun <T> eq(value: T): T = Mockito.eq(value) // Define a utility function to create a mockito eq() object
 }
