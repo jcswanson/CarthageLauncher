@@ -10,55 +10,39 @@ data class NotificationsModel(
     /**
      * The time at which the notification was received.
      */
-    val time: String? = "",
+    val time: String?,
 
     /**
      * The URL or file path of the user's image.
      */
-    val userImage: String? = "",
+    val userImage: String?,
 
     /**
      * The title of the notification.
      */
-    val title: String? = "",
+    val title: String?,
 
     /**
      * The description or body of the notification.
      */
-    val desc: String? = "",
+    val desc: String?,
 
     /**
      * The media image associated with the notification.
      */
-    val mediaImage: Bitmap? = null,
+    val mediaImage: Bitmap?,
 
     /**
      * The type of notification.
      */
-    val notificationType: String? = "",
+    val notificationType: String?,
 
     /**
      * The alarm time associated with the notification.
      */
-    val alarmTime: String? = "",
+    val alarmTime: String?,
 
     /**
      * The package name of the related app.
      */
-    val relatedAppPackageName: String? = "",
 
-    /**
-     * The name of the related app.
-     */
-    val app_name: String? = "",
-
-    /**
-     * The file path or URL of the app icon.
-     */
-    val app_icon: String? = null,
-
-    /**
-     * A unique key for the notification.
-     */
-    val notiKey: String? = null
-)
