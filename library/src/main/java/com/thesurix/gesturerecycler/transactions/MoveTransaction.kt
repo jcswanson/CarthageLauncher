@@ -7,32 +7,20 @@ package com.thesurix.gesturerecycler.transactions
  * @author thesurix
  */
 class MoveTransaction<T>(
-    /**
-     * The index of the item to be moved.
-     */
     private val from: Int,
-
-    /**
-     * The index to which the item will be moved.
-     */
     private val to: Int,
-
-    /**
-     * A flag indicating whether the list has a header or not.
-     * This is used to adjust the index of the moved item.
-     */
-    private val headerEnabled: Boolean
+    private val headerEnabled: Boolean,
+    private val transactional: Transactional<T>
 ) : Transaction<T> {
 
     /**
-     * Performs the move transaction on the given [transactional] data.
+     * Performs the move transaction on the [transactional] data.
      * This method removes the item at the [from] index, adds it to the [to] index,
      * and notifies the adapter of the move.
      *
-     * @param transactional The data on which the transaction will be performed.
      * @return True if the transaction was successful, false otherwise.
      */
-    override fun perform(transactional: Transactional<T>): Boolean {
+    override fun perform(): Boolean {
         return with(transactional.data) {
             // Remove the item at the from index
             val removedItem = removeAt(from)
@@ -50,6 +38,22 @@ class MoveTransaction<T>(
     }
 
     /**
-     * Reverts the move transaction on the given [transactional] data.
+     * Reverts the move transaction on the [transactional] data.
      * This method removes the item at the [to] index, adds it to the [from] index,
-     * and notifies the adapter
+     * and notifies the adapter.
+     */
+    override fun revert() {
+        with(transactional.data) {
+            // Remove the item at the to index
+            val removedItem = removeAt(to)
+            // Add the removed item to the from index
+            removedItem?.let {
+                add(from, it)
+                // Calculate the moved offset based on the headerEnabled flag
+                val movedOffset = if (headerEnabled) 1 else 0
+                // Notify the adapter of the move
+                transactional.notifyMoved(to + movedOffset, from + movedOffset)
+            }
+        }
+    }
+}
