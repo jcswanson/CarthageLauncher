@@ -1,36 +1,34 @@
 // Define the plugin management repositories
 pluginManagement {
     repositories {
-        // Include Google's Maven repository
-        google()
-        // Include Maven Central repository
-        mavenCentral()
-        // Include Gradle Plugin Portal repository
-        gradlePluginPortal()
+        gradlePluginPortal() // Include Gradle Plugin Portal repository
+        google()            // Include Google's Maven repository
+        mavenCentral()      // Include Maven Central repository
     }
 }
 
 // Configure dependency resolution management
-dependencyResolutionManagement {
-    // Fail on project repositories when repositories mode is set to 'FAIL_ON_PROJECT_REPOS'
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-    repositories {
-        // Include Google's Maven repository
-        google()
-        // Include Maven Central repository
-        mavenCentral()
-        // Include Jitpack Maven repository
-        maven { setUrl("https://jitpack.io") }
-        // Include JCenter repository
-        jcenter()
-    }
+repositories {
+    mavenCentral()        // Include Maven Central repository (added again for dependencies)
+    google()              // Include Google's Maven repository (added again for dependencies)
+    maven { url 'https://jitpack.io' }  // Include Jitpack Maven repository
+    //jcenter()             // Commented out: jcenter is going to be deprecated
 }
 
 // Set the root project name to "Beta Backers"
-rootProject.name = "Beta Backers"
+rootProject.name = 'Beta Backers'
 
 // Include the 'app' module
-include(":app")
+include ':app'
 
 // Commented out: include the 'library' module
-//include(":library")
+//include ':library'
+
+// Fail on project repositories when repositories mode is set to 'FAIL_ON_PROJECT_REPOS'
+allprojects {
+    repositories {
+        if (repositoriesMode.equals('FAIL_ON_PROJECT_REPOS')) {
+            fail("Project repository configuration is not allowed.")
+        }
+    }
+}
