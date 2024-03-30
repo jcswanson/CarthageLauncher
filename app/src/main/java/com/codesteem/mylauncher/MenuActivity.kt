@@ -69,8 +69,6 @@ import com.codesteem.mylauncher.test.MonthItem
 import com.codesteem.mylauncher.test.MonthsAdapter
 import com.codesteem.mylauncher.util.MySharedPreferences
 import com.codesteem.mylauncher.util.MySharedPreferences.getPrioritized
-import com.codesteem.mylauncher.util.MySharedPreferences.getStringList
-import com.codesteem.mylauncher.util.MySharedPreferences.getStringListAll
 import com.codesteem.mylauncher.util.MySharedPreferences.isAppsBallonShown
 import com.codesteem.mylauncher.util.MySharedPreferences.isPrioritized
 import com.codesteem.mylauncher.util.MySharedPreferences.modifyPair
@@ -90,7 +88,6 @@ import com.skydoves.powermenu.OnMenuItemClickListener
 import com.skydoves.powermenu.PowerMenu
 import com.skydoves.powermenu.PowerMenuItem
 import com.tapadoo.alerter.Alerter
-import dagger.hilt.android.AndroidEntryPoint
 import io.github.g00fy2.quickie.ScanQRCode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -103,24 +100,19 @@ import java.util.Calendar
 import java.util.Locale
 
 @AndroidEntryPoint
-class MenuActivity : AppCompatActivity(), DecoratedBarcodeView.TorchListener{
+class MenuActivity : AppCompatActivity(), DecoratedBarcodeView.TorchListener {
+
     // Class variable declarations
+    private lateinit var binding: ActivityMenuBinding
+    private lateinit var viewModel: MainViewModel
+    private lateinit var gestureManager: GestureManager
+    private lateinit var notificationListener: NotificationListener
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Initialization of variables and views
+        super.onCreate(savedInstanceState)
+        binding = ActivityMenuBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        // Registering receivers
-
-        // Setting up the barcode scanner
-
-        // Setting up the apps RecyclerView
-
-        // Setting up the search functionality
-
-        // Setting up the QR code scanner
-
-        // Setting up the gesture manager
-
-        // Setting up the notification listener
-
+        viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
+        gestureManager
