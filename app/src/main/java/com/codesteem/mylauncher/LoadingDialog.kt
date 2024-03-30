@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.Window
+import androidx.annotation.StringRes
 import com.codesteem.mylauncher.databinding.LoadingDialogBinding
 
 /**
@@ -13,8 +14,8 @@ import com.codesteem.mylauncher.databinding.LoadingDialogBinding
  * Users can set an OnActionListener to handle the OK and Cancel button clicks.
  */
 class LoadingDialog(
-    context: Context, // Context of the calling component
-    private val title: String? // Optional title for the dialog
+    context: Context,
+    @StringRes titleResId: Int? // Optional title resource ID for the dialog
 ) : Dialog(context) {
     private lateinit var binding: LoadingDialogBinding // View binding for the dialog layout
     private var mListener: OnActionListener? = null // Listener for button clicks
@@ -36,8 +37,8 @@ class LoadingDialog(
         window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
         // Sets the title if provided
-        if (title != null) {
-            binding.title.text = title
+        titleResId?.let {
+            binding.title.text = context.getString(it)
         }
     }
 
@@ -50,4 +51,11 @@ class LoadingDialog(
     }
 
     /**
-
+     * Setter for the OnActionListener
+     *
+     * @param listener The OnActionListener instance
+     */
+    fun setOnActionListener(listener: OnActionListener) {
+        mListener = listener
+    }
+}
