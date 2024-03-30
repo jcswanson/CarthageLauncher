@@ -1,42 +1,55 @@
+// Apply the Android Library plugin to enable building Android libraries.
 apply plugin: 'com.android.library'
+
+// Apply the Kotlin plugin to enable Kotlin support.
 apply plugin: 'kotlin-android'
+
+// Disabled the Kotlin Android Extensions plugin, as it's no longer recommended.
 //apply plugin: 'kotlin-android-extensions'
 
+// Version information for publishing the library.
 ext {
+    // The group ID for the published library.
     PUBLISH_GROUP_ID = 'com.github.thesurix'
+    // The version number for the published library.
     PUBLISH_VERSION = '1.17.0'
+    // The artifact ID for the published library.
     PUBLISH_ARTIFACT_ID = 'gesture-recycler'
 }
 
+// Include the Gradle script for publishing to Maven Central.
 apply from: "${rootProject.projectDir}/publish-mavencentral.gradle"
 
+// Configuration for the Android build process.
 android {
+    // The version of the Android SDK to compile against.
     compileSdkVersion project.getProperty("compileSdk") as Integer
+    // The version of the Android build tools to use.
     buildToolsVersion buildTools
 
+    // Default configuration settings for the Android build.
     defaultConfig {
+        // The minimum Android version to support.
         minSdkVersion project.getProperty("minSdk") as Integer
+        // The target Android version to support.
         targetSdkVersion project.getProperty("targetSdk") as Integer
+        // The version code for the library.
         versionCode 1
+        // The version name for the library.
         versionName version
     }
+
+    // Configuration settings for the release build type.
     buildTypes {
         release {
+            // The ProGuard rules file for the release build.
             consumerProguardFiles 'lib-proguard-rules.pro'
         }
     }
 }
 
+// Dependencies for the project.
 dependencies {
+    // Implementation dependencies for the project.
     implementation supportDependencies.recyclerView
-    implementation supportDependencies.appCompat
-    implementation langDependencies.kotlin
-
-    testImplementation testDependencies.junit
-    testImplementation testDependencies.mockito
-    testImplementation testDependencies.junitKotlin
-}
-
-tasks.withType(Javadoc).all {
-    enabled = false
-}
+    implementation supportDependencies.app
