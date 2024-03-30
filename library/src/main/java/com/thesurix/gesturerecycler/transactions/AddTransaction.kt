@@ -1,27 +1,29 @@
 package com.thesurix.gesturerecycler.transactions
 
-
 /**
  * @author thesurix
  */
-class AddTransaction<T>(private val item: T,
-                        private val headerEnabled: Boolean) : Transaction<T> {
+class AddTransaction<T>(
+    private val item: T,
+    private val headerEnabled: Boolean,
+    private val transactional: Transactional<T> // Add a reference to the Transactional object
+) : Transaction<T> {
 
-    override fun perform(transactional: Transactional<T>): Boolean {
-        return with(transactional.data) {
+    override fun perform(): Boolean {
+        return transactional.data.apply {
             val success = add(item)
             if (success) {
-                transactional.notifyInserted(if (headerEnabled) size else size - 1)
+                notifyInserted(if (headerEnabled) size else size - 1)
             }
             success
         }
     }
 
-    override fun revert(transactional: Transactional<T>): Boolean {
-        return with(transactional.data) {
+    override fun revert(): Boolean {
+        return transactional.data.apply {
             val item = removeAt(size - 1)
             item?.let {
-                transactional.notifyRemoved(if (headerEnabled) size + 1 else size)
+                notifyRemoved(if (headerEnabled) size + 1 else size)
                 true
             } ?: false
         }
