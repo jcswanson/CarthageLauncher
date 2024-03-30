@@ -7,10 +7,14 @@ class ColorStateListAdapter : JsonSerializer<ColorStateList>, JsonDeserializer<C
     // object as input, along with its corresponding type and a JsonSerializationContext object.
     // If the context object is null, the method throws an IllegalArgumentException.
     override fun serialize(src: ColorStateList?, typeOfSrc: Type?, context: JsonSerializationContext?): JsonElement {
-        // The serialize method uses the context object to serialize the ColorStateList object
+        // Check if the input parameters are valid
+        if (context == null) {
+            throw IllegalArgumentException("Unable to serialize ColorStateList without JsonSerializationContext")
+        }
+
+        // Use the context object to serialize the ColorStateList object
         // and return it as a JsonElement object.
-        return context?.serialize(src)
-            ?: throw IllegalArgumentException("Unable to serialize ColorStateList without JsonSerializationContext")
+        return context.serialize(src)
     }
 
     // The deserialize method converts a JsonElement object into a ColorStateList object, which
@@ -18,9 +22,13 @@ class ColorStateListAdapter : JsonSerializer<ColorStateList>, JsonDeserializer<C
     // object as input, along with its corresponding type and a JsonDeserializationContext object.
     // If the context object is null, the method throws an IllegalArgumentException.
     override fun deserialize(json: JsonElement?, typeOfT: Type?, context: JsonDeserializationContext?): ColorStateList {
-        // The deserialize method uses the context object to deserialize the JsonElement object
+        // Check if the input parameters are valid
+        if (context == null) {
+            throw IllegalArgumentException("Unable to deserialize ColorStateList without JsonDeserializationContext")
+        }
+
+        // Use the context object to deserialize the JsonElement object
         // and return it as a ColorStateList object.
-        return context?.deserialize(json, typeOfT)
-            ?: throw IllegalArgumentException("Unable to deserialize ColorStateList without JsonDeserializationContext")
+        return context.deserialize(json, typeOfT)
     }
 }
