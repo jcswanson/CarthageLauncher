@@ -1,72 +1,110 @@
-// Import necessary classes and libraries
+import android.app.Activity
+import android.app.Dialog
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.graphics.Bitmap
+import android.net.Uri
+import android.os.Build
+import android.provider.MediaStore
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
+import androidx.camera.core.CameraSelector
+import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.viewModelFactory
+import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.SimpleExoPlayer
+import com.google.android.exoplayer2.ui.PlayerView
+import com.google.android.exoplayer2.util.Util
+import com.google.common.util.concurrent.ListenableFuture
+import java.util.concurrent.Executor
 
 class BugReportActivity : AppCompatActivity() {
 
-    // Initialize variables and objects
     private lateinit var binding: ActivityBugReportBinding
-    private val viewModel: BugReportViewModel by viewModels()
-    private var bugMedia: MutableList<Uri>? = null
-    private var bugPhotos: MutableList<Uri>? = null
-    private var bugVideos: MutableList<Uri>? = null
-    private var compressedVideos: MutableList<Uri> = ArrayList()
+    private lateinit var viewModel: BugReportViewModel
     private lateinit var loadingDialog: Dialog
-    private var loadingPercent = 0
+    private var mediaItems: MutableList<Uri>? = null
+    private var compressedVideos: MutableList<Uri> = mutableListOf()
+    private var player: SimpleExoPlayer? = null
+    private var playerView: PlayerView? = null
 
-    // Override onCreate method to set up the activity
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityBugReportBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Register broadcast receivers for handling notifications and screen state changes
+        viewModel = ViewModelProvider(this, object : ViewModelProvider.Factory {
+            override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+                return BugReportViewModel() as T
+            }
+        }).get(BugReportViewModel::class.java)
+
+        loadingDialog = LoadingDialog(this)
+
+        binding.back.setOnClickListener { finish() }
+        binding.attachBtn.setOnClickListener { pickMultipleMediaItems.launch(5) }
+        binding.sendBtn.setOnClickListener {
+            if (mediaItems.isNullOrEmpty()) {
+                submit()
+            } else {
+                showConfirmDialog()
+            }
+        }
+
+        viewModel.uploadingStatus.observe(this, Observer {
+            if (it) {
+                loadingDialog.show()
+            } else {
+                loadingDialog.dismiss()
+            }
+        })
+
+        viewModel.loadingPercent.observe(this, Observer {
+            loadingDialog.setMessage("Loading $it%")
+        })
+
         registerReceiver(notificationReceiver, IntentFilter("ACTION_NOTIFICATION_RECEIVED"))
         registerReceiver(screenStateChangedReceiver, IntentFilter().apply {
             addAction(Intent.ACTION_SCREEN_ON)
             addAction(Intent.ACTION_SCREEN_OFF)
         })
 
-        // Handle fullscreen mode and system UI for Android 11 and above
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             enableFullScreenMode()
         }
         hideSystemUI()
 
-        // Initialize the loading dialog and set up the viewModel to listen for uploading status changes
-        loadingDialog = LoadingDialog(this, "Loading $loadingPercent")
-        listenToUploading()
+        mediaItems = mutableListOf()
+    }
 
-        // Set up click listeners for UI elements
-        binding.back.setOnClickListener { finish() }
-        binding.attachBtn.setOnClickListener { pickMultipleMediaItems.launch(request) }
-        binding.sendBtn.setOnClickListener {
-            if (bugMedia?.isEmpty() == true) {
-                submit()
-            } else {
-                showConfirmDialog()
-            }
+    private val notificationReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            // Handle notification
         }
     }
 
-    // Broadcast receiver for handling notifications
-    private val notificationReceiver = object : BroadcastReceiver() {
-        // onReceive method to handle incoming notifications
-    }
-
-    // Broadcast receiver for handling screen state changes
     private val screenStateChangedReceiver = object : BroadcastReceiver() {
-        // onReceive method to handle screen state changes
+        override fun onReceive(context: Context, intent: Intent) {
+            // Handle screen state change
+        }
     }
 
-    // onDestroy method to unregister broadcast receivers
     override fun onDestroy() {
         super.onDestroy()
         unregisterReceiver(notificationReceiver)
         unregisterReceiver(screenStateChangedReceiver)
+        player?.release()
     }
 
-    // Utility methods for handling notification display and time calculations
-
-    // Function to show a notification alert
     private fun showNotificationAlert(
         activity: Activity,
         title: String?,
@@ -76,70 +114,64 @@ class BugReportActivity : AppCompatActivity() {
         actions: Array<Notification.Action>,
         msgId: String?
     ) {
-        // Code for showing the notification alert
+        // Show notification alert
     }
 
-    // Function to convert a byte array to a Bitmap
     private fun byteArrayToBitmap(byteArray: ByteArray): Bitmap? {
-        // Code for converting a byte array to a Bitmap
+        // Convert byte array to bitmap
+        return null
     }
 
-    // Function to listen for uploading status changes
-    private fun listenToUploading() = lifecycleScope.launch {
-        // Code for collecting uploading status updates
+    private fun listenToUploading() {
+        // Listen for uploading status changes
     }
 
-    // Function to submit the bug report
     private fun submit() {
-        // Code for submitting the bug report
+        // Submit bug report
     }
 
-    // Function to show a confirmation dialog before submitting the bug report
     private fun showConfirmDialog() {
-        // Code for showing a confirmation dialog
+        // Show confirmation dialog
     }
 
-    // Utility methods for handling media file selection and compression
+    private val pickMultipleMediaItems =
+        registerForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(5)) {
+            // Handle picked media items
+            mediaItems = it.toMutableList()
+        }
 
-    // Function to pick multiple media items
-    private val pickMultipleMediaItems = registerForActivityResult(
-        ActivityResultContracts.PickMultipleVisualMedia(5)
-    ) { task ->
-        // Code for handling picked media items
-    }
-
-    // Function to query the display name of a file
     private fun queryName(resolver: ContentResolver, uri: Uri): String {
-        // Code for querying the display name of a file
+        // Query display name of file
+        return ""
     }
 
-    // Function to compress videos
     private fun videoCompressor(list: List<Uri>) {
-        // Code for compressing videos using the Light Compressor library
+        // Compress videos
     }
 
-    // Utility methods for handling media file types
-
-    // Function to check if a URI points to a video file
     private fun isVideo(uri: Uri): Boolean {
-        // Code for checking if a URI points to a video file
+        // Check if URI points to a video file
+        return false
     }
 
-    // Function to check if a URI points to an image file
     private fun isImage(uri: Uri): Boolean {
-        // Code for checking if a URI points to an image file
+        // Check if URI points to an image file
+        return false
     }
 
-    // Utility methods for handling fullscreen mode and system UI
-
-    // Function to hide the system UI
     private fun hideSystemUI() {
-        // Code for hiding the system UI
+        // Hide system UI
     }
 
-    // Function to enable fullscreen mode for Android 11 and above
     @RequiresApi(api = Build.VERSION_CODES.R)
     private fun enableFullScreenMode() {
-        // Code for enabling fullscreen mode for Android 11 and above
+        // Enable fullscreen mode
     }
-}
+
+    fun playMedia(uri: Uri) {
+        if (player == null) {
+            player = SimpleExoPlayer.Builder(this).build()
+            playerView = PlayerView(this)
+            playerView?.player = player
+            binding.mediaContainer.addView(playerView, ConstraintLayout.LayoutParams(
+                ConstraintLayout
