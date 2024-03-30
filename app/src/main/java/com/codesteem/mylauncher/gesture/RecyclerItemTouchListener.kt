@@ -1,8 +1,13 @@
 package com.codesteem.mylauncher.gesture
 
+import android.content.Context
 import android.view.GestureDetector
+import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
+import android.view.View
+import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
 
 /**
  * Class that is responsible for handling item touch events in a RecyclerView.
@@ -10,9 +15,10 @@ import androidx.recyclerview.widget.RecyclerView
  * @param listener listener for item's click events
  * @author thesurix
  */
-class RecyclerItemTouchListener<T>(private val listener: ItemClickListener<T>) : RecyclerView.SimpleOnItemTouchListener() {
+class RecyclerItemTouchListener<T>(private val listener: ItemClickListener<T>) : RecyclerView.OnChildAttachStateChangeListener, View.OnTouchListener {
 
     private var gestureDetector: GestureDetector? = null
+    private var gestureListener: GestureListener<T>? = null
 
     /**
      * The listener that is used to notify when a tap, long press or double tap occur.
@@ -43,71 +49,40 @@ class RecyclerItemTouchListener<T>(private val listener: ItemClickListener<T>) :
         fun onDoubleTap(item: T, position: Int): Boolean
     }
 
-    private val gestureClickListener = GestureClickListener(listener)
+    private inner class GestureListener<T>(private val listener: ItemClickListener<T>) : GestureDetector.SimpleOnGestureListener() {
 
-    /**
-     * Override the onInterceptTouchEvent method to detect touch events on the RecyclerView.
-     * Find the child view under the touch event coordinates and get its position.
-     * If the position is valid and the adapter is an instance of GestureAdapter,
-     * set the touched item and position for the gesture listener.
-     * Use the gesture detector to handle touch events and return the result.
-     */
-    override fun onInterceptTouchEvent(view: RecyclerView, e: MotionEvent): Boolean {
-        val childView = view.findChildViewUnder(e.x, e.y) ?: return false
-        val childPosition = view.getChildAdapterPosition(childView)
-        if (childPosition == RecyclerView.NO_POSITION) {
-            return false
+        var item: T? = null
+        var itemId: Long = RecyclerView.NO_ID
+
+        override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
+            return item?.let { listener.onItemClick(it, recyclerView.getChildAdapterPosition(itemView)) } ?: false
         }
 
-        val adapter = view.adapter
-        if (adapter is GestureAdapter<*, *>) {
-            val gestureAdapter = adapter as GestureAdapter<T, *>
-            gestureClickListener.setTouchedItem(gestureAdapter.getItem(childPosition), childPosition)
+        override fun onLongPress(e: MotionEvent) {
+            item?.let { listener.onItemLongPress(it, recyclerView.getChildAdapterPosition(itemView)) }
+            itemView.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
         }
 
-        if (gestureDetector == null) {
-            gestureDetector = GestureDetector(view.context, gestureClickListener)
+        override fun onDoubleTap(e: MotionEvent): Boolean {
+            return item?.let { listener.onDoubleTap(it, recyclerView.getChildAdapterPosition(itemView)) } ?: false
         }
-
-        return gestureDetector?.onTouchEvent(e) ?: false
-    }
-}
-
-private class GestureClickListener<T> internal constructor(private val listener: RecyclerItemTouchListener.ItemClickListener<T>)
-    : GestureDetector.SimpleOnGestureListener() {
-
-    private var item: T? = null
-    private var viewPosition = 0
-
-    /**
-     * Called when a single tap is confirmed.
-     * If the touched item and position are set, call the onItemClick method of the listener.
-     */
-    override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
-        return item?.let { listener.onItemClick(it, viewPosition) } ?: false
     }
 
-    /**
-     * Called when a long press is detected.
-     * If the touched item and position are set, call the onItemLongPress method of the listener.
-     */
-    override fun onLongPress(e: MotionEvent) {
-        item?.let { listener.onItemLongPress(it, viewPosition) }
+    override fun onChildViewAttachedToWindow(view: View) {
+        if (gestureListener == null) {
+            gestureListener = GestureListener(listener)
+            gestureDetector = GestureDetector(view.context, gestureListener)
+            view.setOnTouchListener(this)
+        }
     }
 
-    /**
-     * Called when a double tap is detected.
-     * If the touched item and position are set, call the onDoubleTap method of the listener.
-     */
-    override fun onDoubleTap(e: MotionEvent): Boolean {
-        return item?.let { listener.onDoubleTap(it, viewPosition) } ?: false
+    override fun onChildViewDetachedFromWindow(view: View) {
+        itemView.setOnTouchListener(null)
+        gestureListener = null
+        gestureDetector = null
     }
 
-    /**
-     * Set the touched item and position for the gesture listener.
-     */
-    internal fun setTouchedItem(item: T, viewPosition: Int) {
-        this.item = item
-        this.viewPosition = viewPosition
+    override fun onTouch(v: View, event: MotionEvent): Boolean {
+        return gestureDetector?.onTouchEvent(event) ?: false
     }
 }
