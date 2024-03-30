@@ -4,23 +4,31 @@ import android.service.notification.StatusBarNotification
 import androidx.room.TypeConverter
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import java.lang.reflect.Modifier
+import com.google.gson.TypeAdapter
+import com.google.gson.reflect.TypeToken
+import com.google.gson.stream.JsonReader
+import com.google.gson.stream.JsonWriter
+import java.io.IOException
 
-class StatusBarNotificationConverter {
+object StatusBarNotificationConverter {
 
-    val gson = GsonBuilder()
-        .excludeFieldsWithModifiers()
+    private val gson = GsonBuilder()
         .registerTypeAdapter(RuntimeException::class.java, RuntimeExceptionAdapter())
         .registerTypeAdapter(StatusBarNotification::class.java, ParcelableTypeAdapter(StatusBarNotification.CREATOR))
         .create()
 
-    @TypeConverter
-    fun fromStatusBarNotification(statusBarNotification: StatusBarNotification?): String? {
-        return gson.toJson(statusBarNotification)
+    private object RuntimeExceptionAdapter : TypeAdapter<RuntimeException>() {
+        override fun write(out: JsonWriter, value: RuntimeException?) {
+            if (value == null) {
+                out.nullValue()
+                return
+            }
+            out.value(value.message)
+        }
+
+        override fun read(input: JsonReader): RuntimeException? {
+            return RuntimeException(input.nextString())
+        }
     }
 
-    @TypeConverter
-    fun toStatusBarNotification(value: String?): StatusBarNotification? {
-        return gson.fromJson(value, StatusBarNotification::class.java)
-    }
-}
+    private class ParcelableTypeAdapter<T : Parcelable>(private
