@@ -1,18 +1,20 @@
-// com.codesteem.mylauncher package
+package com.codesteem.mylauncher
 
 /**
- * Interface for listening to changes in the user's selection.
+ * A function that is called when the user's selection has changed.
  *
- * Implementors of this interface will receive notifications when the user's selection changes,
- * including the number of items selected and the package name of the selected items.
+ * @param selectedCount The number of items currently selected.
+ * @param packageName The package name of the selected items.
  */
-interface SelectionChangeListener {
+typealias SelectionChangeListener = (selectedCount: Int, packageName: String) -> Unit
 
-    /**
-     * Called when the user's selection has changed.
-     *
-     * @param selectedCount The number of items currently selected.
-     * @param packageName The package name of the selected items.
-     */
-    fun onSelectionChanged(selectedCount: Int, packageName: String)
+
+
+val listener: SelectionChangeListener = { selectedCount, packageName ->
+    // Do something when the selection changes
 }
+
+
+
+listener(5, "com.example.app")
+
