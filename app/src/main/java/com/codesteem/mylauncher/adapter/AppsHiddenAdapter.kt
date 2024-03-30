@@ -15,13 +15,11 @@ import com.codesteem.mylauncher.R
 import com.codesteem.mylauncher.SelectionChangeListener
 import com.codesteem.mylauncher.SelectionHiddenChangeListener
 
-
 // AppsHiddenAdapter class definition with constructor and inheritance from RecyclerView.Adapter
 class AppsHiddenAdapter(
     private val context: Context, // Context for accessing system services
     private val appList: MutableList<String>, // List of app package names
     private val selectionHiddenChangeListener: SelectionHiddenChangeListener // Listener for selection hidden changes
-
 ) : RecyclerView.Adapter<AppsHiddenAdapter.ViewHolder>() {
 
     // Declare and initialize a mutable set for storing selected apps
@@ -56,7 +54,6 @@ class AppsHiddenAdapter(
         holder.itemView.setOnLongClickListener {
             isSelectionMode = true
             toggleSelection(packageName, holder.checkBox)
-            notifyDataSetChanged()
             true
         }
 
@@ -71,7 +68,12 @@ class AppsHiddenAdapter(
 
         // Set checked change listener for the checkbox to toggle selection
         holder.checkBox.setOnCheckedChangeListener { _, isChecked ->
-            toggleSelection(packageName, holder.checkBox)
+            if (isChecked) {
+                selectedApps.add(packageName)
+            } else {
+                selectedApps.remove(packageName)
+            }
+            selectionHiddenChangeListener.onSelectionHiddenChanged(selectedApps.size, packageName)
         }
     }
 
@@ -85,9 +87,6 @@ class AppsHiddenAdapter(
             selectedApps.add(packageName)
             checkBox.isChecked = true
         }
-
-        // Notify the listener about the selection hidden change
-        selectionHiddenChangeListener.onSelectionHiddenChanged(selectedApps.size, packageName)
     }
 
     // Method for retrieving the list of hidden selected apps
@@ -134,4 +133,5 @@ class AppsHiddenAdapter(
         // Declare and initialize the views using the itemView
         val appLogoImageView: ImageView = itemView.findViewById(R.id.appLogoImageView)
         val checkBox: CheckBox = itemView.findViewById(R.id.checkbox)
-   
+    }
+}
