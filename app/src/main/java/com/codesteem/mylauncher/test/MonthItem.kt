@@ -1,4 +1,4 @@
-// This is an interface for MonthItem, which represents an item in a month view.
+// Interface for MonthItem, which represents an item in a month view.
 interface MonthItem {
 
     // The type of the MonthItem. It can be either HEADER or MONTH.
@@ -18,3 +18,17 @@ interface MonthItem {
         MONTH
     }
 }
+
+// Data class for MonthHeaderItem, which is a concrete implementation of MonthItem for the header.
+data class MonthHeaderItem(
+    override val type: MonthItemType = MonthItemType.HEADER,
+    override val name: String,
+    override val openCounter: Int = 0
+) : MonthItem
+
+// Data class for MonthDayItem, which is a concrete implementation of MonthItem for the individual days.
+data class MonthDayItem(
+    override val type: MonthItemType = MonthItemType.MONTH,
+    override val name: String,
+    override val openCounter: Int = 0
+) : MonthItem
