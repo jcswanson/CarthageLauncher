@@ -1,10 +1,18 @@
 package com.thesurix.gesturerecycler.transactions
 
 /**
- * Interface for a transaction that can be performed and reverted on a [Transactional] object.
+ * Marker interface for an object that supports transactions.
  * A transaction represents a single unit of work that can be executed and then undone,
- * leaving the system in the transactional object in the same state as before the transaction.
+ * leaving the system in the same state as before the transaction.
  *
+ * @author thesurix
+ */
+interface Transactional<T>
+
+/**
+ * Interface for a transaction that can be performed and reverted on a [Transactional] object.
+ *
+ * @param T The type of the object on which the transaction will be performed.
  * @author thesurix
  */
 interface Transaction<T> {
