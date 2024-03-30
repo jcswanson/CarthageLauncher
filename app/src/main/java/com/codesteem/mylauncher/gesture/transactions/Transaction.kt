@@ -5,15 +5,13 @@
  * This interface defines two methods, `perform` and `revert`, that allow a transaction to be executed
  * and then undone, respectively.
  *
- * @param T The type of object that this transaction can be performed on.
+ * @template T The type of object that this transaction can be performed on.
+ * @template R The type of the result returned by the `perform` method.
  *
  * @author thesurix
  */
-interface Transaction<T> {
+interface Transaction<T, R> {
     /**
      * Performs this transaction on the given [transactional] object.
      *
-     * This method should execute the transaction and make any necessary changes to the [transactional]
-     * object. If the transaction is successful, this method should return `true`. If the transaction
-     * fails for any reason, this method should return `false`.
     
