@@ -4,45 +4,51 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.annotation.LayoutRes
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
 import com.codesteem.mylauncher.R
 import com.codesteem.mylauncher.databinding.GridItemBinding
 import com.codesteem.mylauncher.databinding.MonthHeaderItemBinding
 import com.codesteem.mylauncher.gesture.GestureAdapter
 import com.codesteem.mylauncher.gesture.GestureViewHolder
 import com.codesteem.mylauncher.gesture.TYPE_HEADER_ITEM
+import com.codesteem.mylauncher.model.MonthItem
 
 class MonthsAdapter(
-    @param:LayoutRes private val mItemResId: Int
-): GestureAdapter<MonthItem, GestureViewHolder<MonthItem>>() {
+    @LayoutRes private val mItemResId: Int,
+    private val onItemClick: (MonthItem) -> Unit
+) : ListAdapter<MonthItem, RecyclerView.ViewHolder>(MonthItemDiffCallback()) {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GestureViewHolder<MonthItem> {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return if (viewType == MonthItem.MonthItemType.MONTH.ordinal) {
-            when (mItemResId) {
-                R.layout.grid_item -> GridItemViewHolder(
-                    GridItemBinding.inflate(LayoutInflater.from(parent.context),
-                        parent,
-                        false
-                    )
-                )
-                else -> throw UnsupportedOperationException("Unsupported resource")
-            }
+            GridItemViewHolder(
+                GridItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            )
         } else if (viewType == TYPE_HEADER_ITEM) {
-            createHeaderOrFooterViewHolder(parent.context, parent, R.layout.header_item)
+            createHeaderViewHolder(parent.context, parent)
         } else {
             MonthHeaderViewHolder(MonthHeaderItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
         }
     }
 
-    override fun getItemViewType(viewPosition: Int): Int {
-        val handledType = super.getItemViewType(viewPosition)
-        if (handledType > 0) {
-            return handledType
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        getItem(position).let { item ->
+            when (holder) {
+                is GridItemViewHolder -> holder.bind(item)
+                is MonthHeaderViewHolder -> holder.bind(item)
+            }
+            holder.itemView.setOnClickListener { onItemClick(item) }
         }
-        return getItemByViewPosition(viewPosition).type.ordinal
     }
-    private fun createHeaderOrFooterViewHolder(context: Context, parent: ViewGroup, @LayoutRes layout: Int): GestureViewHolder<MonthItem> {
-        val view = LayoutInflater.from(context).inflate(layout, parent, false)
-        return object : GestureViewHolder<MonthItem>(view) {
+
+    override fun getItemViewType(position: Int): Int {
+        return getItem(position).type.ordinal
+    }
+
+    private fun createHeaderViewHolder(context: Context, parent: ViewGroup): RecyclerView.ViewHolder {
+        val view = LayoutInflater.from(context).inflate(R.layout.header_item, parent, false)
+        return object : RecyclerView.ViewHolder(view) {
             override fun canDrag() = false
 
             override fun canSwipe() = false
@@ -50,26 +56,44 @@ class MonthsAdapter(
     }
 
     fun addItem(selectedApp: MonthItem) {
-        val list = ArrayList(data)
-        list.add(selectedApp)
-        notifyDataSetChanged()
+        val newList = mutableListOf(*currentList.toTypedArray(), selectedApp)
+        submitList(newList)
     }
 
-    private fun removeItem(selectedApp: MonthItem) {
-        val list = ArrayList(data)
-        list.remove(selectedApp)
-        notifyDataSetChanged()
+    fun removeItem(selectedApp: MonthItem) {
+        val newList = currentList.toMutableList().apply { remove(selectedApp) }
+        submitList(newList)
     }
 
     fun moveItem(from: Int, to: Int) {
-        val list = data.toMutableList()
-        val fromLocation = list[from]
-        list.removeAt(from)
-        if (to < from) {
-            list.add(to + 1 , fromLocation)
-        } else {
-            list.add(to - 1, fromLocation)
+        val newList = currentList.toMutableList().apply {
+            val fromLocation = get(from)
+            removeAt(from)
+            if (to < from) {
+                add(to + 1, fromLocation)
+            } else {
+                add(to - 1, fromLocation)
+            }
         }
-        data = list
+        submitList(newList)
+    }
+
+    class MonthItemDiffCallback : DiffUtil.ItemCallback<MonthItem>() {
+        override fun areItemsTheSame(oldItem: MonthItem, newItem: MonthItem): Boolean =
+            oldItem.id == newItem.id
+
+        override fun areContentsTheSame(oldItem: MonthItem, newItem: MonthItem): Boolean =
+            oldItem == newItem
     }
 }
+
+abstract class MonthsViewHolder<T : MonthItem>(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    abstract fun bind(item: T)
+    open fun canDrag() = true
+    open fun canSwipe() = true
+}
+
+class GridItemViewHolder(private val binding: GridItemBinding) : MonthsViewHolder<MonthItem.Month>(binding.root) {
+    override fun bind(item: MonthItem.Month) {
+        binding.month = item
+        binding.
