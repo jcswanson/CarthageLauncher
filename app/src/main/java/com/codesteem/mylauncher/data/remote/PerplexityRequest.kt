@@ -1,19 +1,8 @@
-package com.codesteem.mylauncher.data.remote
-
-import androidx.annotation.Keep
-
+// Data class representing the request for a Perplexity API call
+// Contains a boolean flag 'stream' to indicate if streaming response is required,
+// a string 'model' to specify the model to be used for the API call,
+// and a list of 'Message' objects 'messages' containing the prompts for the API call.
 @Keep
 data class PerplexityRequest(
-    val stream: Boolean = true,
-    val model: String = "pplx-70b-online",
-    val messages: List<Message> = listOf(
-        Message()
-    )
-)
-
-@Keep
-data class Message(
-    val role: String = "system",
-    val content: String = "Be precise and concise.",
-)
-
+    val stream: Boolean = true, // Set to true by default to enable streaming response
+    val model: String = "pplx-7
