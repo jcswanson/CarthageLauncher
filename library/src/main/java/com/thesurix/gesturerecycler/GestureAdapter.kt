@@ -4,171 +4,139 @@
  *
  * @author thesurix
  */
-private const val INVALID_DRAG_POS = -1
 const val TYPE_HEADER_ITEM = 456789
 const val TYPE_FOOTER_ITEM = TYPE_HEADER_ITEM + 1
 
-class GestureAdapter<T, K : GestureViewHolder<T>> : RecyclerView.Adapter<K>(), Transactional<T> {
+interface OnDataChangeListener<T> {
+    fun onItemRemoved(position: Int)
+    fun onItemReordered(fromPosition: Int, toPosition: Int)
+}
 
-    // Temp item for swap action
+interface OnGestureListener<T> {
+    fun onStartDrag(viewHolder: RecyclerView.ViewHolder)
+}
+
+class GestureAdapter<T>(
+    private val data: MutableList<T>,
+    private val gestureListener: OnGestureListener<T>? = null,
+    private val dataChangeListener: OnDataChangeListener<T>? = null,
+    private val manualDragAllowed: Boolean = false,
+    private val headerEnabled: Boolean = false,
+    private val footerEnabled: Boolean = false,
+    private val undoSize: Int = 1
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), Transactional<T> {
+
     private var swappedItem: T? = null
+    private var startDragPos = RecyclerView.NO_POSITION
+    private var stopDragPos = RecyclerView.NO_POSITION
+    private val transactions = FixedSizeArrayDequeue<Transaction<T>>(undoSize)
 
-    // Start and stop positions of the drag action
-    private var startDragPos = 0
-    private var stopDragPos = INVALID_DRAG_POS
+    private val emptyViewDataObserver = object : RecyclerView.AdapterDataObserver() {
+        override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
+            super.onItemRangeRemoved(positionStart, itemCount)
+            if (itemCount > 0 && data.isEmpty()) notifyItemRangeInserted(0, 1)
+        }
 
-    // Flags to enable/disable manual dragging, header item, and footer item
-    private var manualDragAllowed = false
-    private var headerEnabled = false
-    private var footerEnabled = false
-
-    // Stack for data transactions for undo purposes
-    private var transactions = FixedSizeArrayDequeue<Transaction<T>>(1)
-
-    // Listeners for gesture and data changes
-    private var gestureListener: OnGestureListener<T>? = null
-    private var dataChangeListener: OnDataChangeListener<T>? = null
-
-    // Empty view data observer and attach listener
-    private val emptyViewDataObserver = EmptyViewDataObserver()
-    private val attachListener = object : View.OnAttachStateChangeListener {
-        // onViewAttachedToWindow and onViewDetachedFromWindow methods to handle empty view data observer registration
+        override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+            super.onItemRangeInserted(positionStart, itemCount)
+            if (itemCount > 0 && data.isEmpty()) notifyItemRangeRemoved(0, 1)
+        }
     }
 
-    // Collection for adapter's data
-    private val _data = mutableListOf<T>()
-
-    /**
-     * Returns adapter's data.
-     * @return adapter's data
-     */
-    /**
-     * Sets adapter data. This method will interrupt pending animations.
-     * Use [.add], [.remove] or [.insert] or [.setData] to achieve smooth animations.
-     * @param data data to show
-     */
-    override var data: MutableList<T>
-        get() = _data
-        set(data) = setData(data, null)
-
-    // Interface for data changes inside adapter
-    interface OnDataChangeListener<T> {
-        // onItemRemoved, onItemReorder methods for data change events
+    init {
+        registerAdapterDataObserver(emptyViewDataObserver)
     }
 
-    // Interface for gestures
-    internal interface OnGestureListener<T> {
-        // onStartDrag method for gesture events
+    override fun getItemViewType(position: Int): Int {
+        if (headerEnabled && position == 0) return TYPE_HEADER_ITEM
+        if (footerEnabled && position == itemCount - 1) return TYPE_FOOTER_ITEM
+        return 0
     }
 
-    // Overridden methods for RecyclerView.Adapter
-    override fun getItemViewType(viewPosition: Int): Int {
-        // Handles header and footer item view types
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int, payloads: MutableList<Any>) {
+        if (payloads.isEmpty() && holder is GestureViewHolder<T>) {
+            holder.bind(data[position])
+        }
     }
 
-    override fun onBindViewHolder(holder: K, position: Int, payloads: MutableList<Any>) {
-        // Binds data to the view holder and handles header and footer items
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        if (holder is GestureViewHolder<T> && manualDragAllowed) {
+            holder.itemView.setOnTouchListener(holder.createItemTouchHelperGestureListener(gestureListener))
+        }
+        (holder as? GestureViewHolder<T>)?.bind(data[position])
     }
 
-    override fun onBindViewHolder(holder: K, position: Int) {
-        // Handles manual dragging and touch listener for the draggable view
+    override fun onViewRecycled(holder: RecyclerView.ViewHolder) {
+        (holder as? GestureViewHolder<T>)?.onViewRecycled()
     }
 
-    override fun onViewRecycled(holder: K) {
-        // Recycles the view holder
-    }
+    override fun getItemCount(): Int = data.size + if (headerEnabled) 1 else 0 + if (footerEnabled) 1 else 0
 
-    override fun getItemCount(): Int {
-        // Returns the total number of items in the adapter
-    }
-
-    // Overridden methods for RecyclerView.AdapterDataObserver
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
-        // Handles empty view data observer registration and attach listener
+        if (recyclerView.layoutManager is LinearLayoutManager) {
+            (recyclerView.layoutManager as LinearLayoutManager).onItemsMoveFinished(object : LinearLayoutManager.OnItemsMoveFinishedCallback {
+                override fun onItemsMoveFinished() {
+                    dataChangeListener?.onItemReordered(startDragPos, stopDragPos)
+                }
+            })
+        }
     }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
-        // Handles empty view data observer unregistration and reset transactions
+        transactions.clear()
+        registerAdapterDataObserver(emptyViewDataObserver)
     }
 
     override fun notifyChanged(position: Int) {
-        // Notifies the item changed at the given position
+        notifyItemChanged(position)
     }
 
     override fun notifyInserted(position: Int) {
-        // Notifies the item inserted at the given position
+        notifyItemInserted(position)
     }
 
     override fun notifyRemoved(position: Int) {
-        // Notifies the item removed at the given position
+        notifyItemRemoved(position)
     }
 
     override fun notifyMoved(fromPosition: Int, toPosition: Int) {
-        // Notifies the item moved from one position to another
+        notifyItemMoved(fromPosition, toPosition)
     }
 
-    // Methods for data manipulation
-    fun setData(data: List<T>, diffCallback: DiffUtil.Callback?) {
-        // Sets new data with DiffUtil.Callback for smooth animations
+    override fun setItem(position: Int, item: T) {
+        data[position] = item
+        notifyItemChanged(position)
     }
 
-    fun clearData() {
-        // Clears all data
+    override fun add(item: T): Boolean {
+        val position = data.size
+        data.add(item)
+        notifyItemInserted(position)
+        return true
     }
 
-    fun getItem(position: Int): T {
-        // Returns the item at the given position
+    override fun remove(position: Int): Boolean {
+        if (position !in 0 until data.size) return false
+        swappedItem = data.removeAt(position)
+        notifyItemRemoved(position)
+        dataChangeListener?.onItemRemoved(position)
+        return true
     }
 
-    fun getItemByViewPosition(position: Int): T {
-        // Returns the item at the given view position
+    override fun insert(item: T, position: Int) {
+        data.add(position, item)
+        notifyItemInserted(position)
     }
 
-    fun add(item: T): Boolean {
-        // Adds an item to the adapter
+    override fun move(fromPosition: Int, toPosition: Int): Boolean {
+        if (fromPosition !in 0 until data.size || toPosition !in 0 until data.size) return false
+        val item = data.removeAt(fromPosition)
+        data.add(toPosition, item)
+        notifyItemMoved(fromPosition, toPosition)
+        dataChangeListener?.onItemReordered(fromPosition, toPosition)
+        return true
     }
 
-    fun remove(position: Int): Boolean {
-        // Removes an item from the adapter
-    }
-
-    fun insert(item: T, position: Int) {
-        // Inserts an item at the given position
-    }
-
-    fun move(fromPosition: Int, toPosition: Int): Boolean {
-        // Moves an item from one position to another
-    }
-
-    fun swap(firstPosition: Int, secondPosition: Int): Boolean {
-        // Swaps two items
-    }
-
-    // Methods for empty view handling
-    fun setEmptyView(emptyView: View) {
-        // Sets the empty view
-    }
-
-    fun setEmptyViewVisibilityListener(listener: EmptyViewVisibilityListener) {
-        // Sets the empty view visibility listener
-    }
-
-    fun setUndoSize(size: Int) {
-        // Sets the undo stack size
-    }
-
-    fun undoLast(): Boolean {
-        // Undoes the last data transaction
-    }
-
-    // Methods for data change listener and header/footer item state
-    fun setDataChangeListener(listener: OnDataChangeListener<T>) {
-        // Sets the data change listener
-    }
-
-    fun setHeaderEnabled(enabled: Boolean) {
-        // Enables or disables the header item
-    }
-
-    fun setFooterEnabled(enabled: Boolean) {
-       
+    override fun swap(firstPosition: Int, secondPosition: Int): Boolean {
+        if (firstPosition !in 0 until data.size || secondPosition !in 0 until data.size) return false
+        val firstItem = data
