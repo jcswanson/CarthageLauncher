@@ -32,17 +32,25 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
     // Lateinit property for ViewBinding instance
     protected lateinit var binding: VB
 
-    // Called when the activity is starting.
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         // Initialize the ViewBinding instance
-        binding = getViewBinding()
+        initializeBinding()
 
         // Set the content view using the inflated layout
         setContentView(binding.root)
+
+        // Perform any common initialization here
+        initialize()
     }
 
     // Abstract method to get the ViewBinding instance
     abstract fun getViewBinding(): VB
+
+    // Abstract method to initialize the ViewBinding instance
+    protected abstract fun initializeBinding()
+
+    // Abstract method to perform any common initialization
+    protected abstract fun initialize()
 }
