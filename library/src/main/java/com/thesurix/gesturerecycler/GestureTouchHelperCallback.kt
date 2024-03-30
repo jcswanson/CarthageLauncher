@@ -12,28 +12,46 @@ import com.thesurix.gesturerecycler.LayoutFlags.*
  * @param adapter adapter
  * @author thesurix
  */
+@Suppress("UNUSED_PARAMETER")
 private val DIRECTIONS = listOf(ItemTouchHelper.LEFT, ItemTouchHelper.RIGHT, ItemTouchHelper.UP, ItemTouchHelper.DOWN)
-class GestureTouchHelperCallback(private val gestureAdapter: GestureAdapter<*, *>) : ItemTouchHelper.Callback() {
+class GestureTouchHelperCallback @JvmOverloads constructor(
+    private val gestureAdapter: GestureAdapter<*, *>,
+    swipeEnabled: Boolean = false,
+    manualDragEnabled: Boolean = false,
+    longPressDragEnabled: Boolean = false,
+    dragFlags: Int = ItemTouchHelper.UP or ItemTouchHelper.DOWN,
+    swipeFlags: Int = ItemTouchHelper.RIGHT
+) : ItemTouchHelper.Callback() {
 
     /** Flag that enables or disables swipe gesture  */
-    var swipeEnabled = false
-    /** Flag that enables or disables manual drag gesture  */
-    var manualDragEnabled = false
-        set(enabled) {
-            field = enabled
-            gestureAdapter.allowManualDrag(manualDragEnabled)
+    var swipeEnabled: Boolean = swipeEnabled
+        set(value) {
+            field = value
+            gestureAdapter.allowSwipe(value)
         }
+
+    /** Flag that enables or disables manual drag gesture  */
+    var manualDragEnabled: Boolean = manualDragEnabled
+        set(value) {
+            field = value
+            gestureAdapter.allowManualDrag(value)
+        }
+
     /** Flag that enables long press drag gesture  */
-    var longPressDragEnabled = false
+    var longPressDragEnabled: Boolean = longPressDragEnabled
 
     /** Flags for drag gesture  */
-    var dragFlags = ItemTouchHelper.UP or ItemTouchHelper.DOWN
+    var dragFlags: Int = dragFlags
+
     /** Flags for swipe gesture  */
-    var swipeFlags = ItemTouchHelper.RIGHT
+    var swipeFlags: Int = swipeFlags
 
     override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
         val holder = viewHolder as GestureViewHolder<*>
-        return makeMovementFlags(if (holder.canDrag()) dragFlags else 0, if (holder.canSwipe()) swipeFlags else 0)
+        return makeMovementFlags(
+            if (holder.canDrag()) dragFlags else 0,
+            if (holder.canSwipe()) swipeFlags else 0
+        )
     }
 
     override fun onMove(recyclerView: RecyclerView, source: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
@@ -51,9 +69,16 @@ class GestureTouchHelperCallback(private val gestureAdapter: GestureAdapter<*, *
         }
     }
 
-    override fun onChildDraw(c: Canvas, recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, dX: Float, dY: Float,
-                             actionState: Int, isCurrentlyActive: Boolean) {
-        when(actionState) {
+    override fun onChildDraw(
+        c: Canvas,
+        recyclerView: RecyclerView,
+        viewHolder: RecyclerView.ViewHolder,
+        dX: Float,
+        dY: Float,
+        actionState: Int,
+        isCurrentlyActive: Boolean
+    ) {
+        when (actionState) {
             ItemTouchHelper.ACTION_STATE_SWIPE -> {
                 val direction = when {
                     dX.compareTo(0f) == 0 -> if (dY < 0) ItemTouchHelper.UP else ItemTouchHelper.DOWN
@@ -83,52 +108,4 @@ class GestureTouchHelperCallback(private val gestureAdapter: GestureAdapter<*, *
     override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
         super.clearView(recyclerView, viewHolder)
         gestureAdapter.onItemMoved()
-        if (viewHolder is GestureViewHolder<*>) {
-            viewHolder.onItemClear()
-            hideBackgroundViews(viewHolder)
-
-            val foregroundView = viewHolder.foregroundView
-            getDefaultUIUtil().clearView(foregroundView)
-        }
-    }
-
-    private fun hideBackgroundViews(viewHolder: GestureViewHolder<*>) {
-        DIRECTIONS.forEach {
-            viewHolder.getBackgroundView(it)?.visibility = View.GONE
-        }
-    }
-
-    override fun isLongPressDragEnabled(): Boolean {
-        return longPressDragEnabled
-    }
-
-    override fun isItemViewSwipeEnabled(): Boolean {
-        return swipeEnabled
-    }
-
-    /**
-     * Sets predefined drag flags for RecyclerView layout.
-     * @param layout type of the RecyclerView layout
-     */
-    fun setDragFlagsForLayout(layout: RecyclerView.LayoutManager) {
-        dragFlags = when (layout) {
-            is GridLayoutManager -> GRID.getDragFlags(layout)
-            is LinearLayoutManager -> LINEAR.getDragFlags(layout)
-            is StaggeredGridLayoutManager -> STAGGERED.getDragFlags(layout)
-            else -> throw IllegalArgumentException("Unsupported layout type.")
-        }
-    }
-
-    /**
-     * Sets predefined swipe flags for RecyclerView layout.
-     * @param layout type of the RecyclerView layout
-     */
-    fun setSwipeFlagsForLayout(layout: RecyclerView.LayoutManager) {
-        swipeFlags = when (layout) {
-            is GridLayoutManager -> GRID.getSwipeFlags(layout)
-            is LinearLayoutManager -> LINEAR.getSwipeFlags(layout)
-            is StaggeredGridLayoutManager -> STAGGERED.getSwipeFlags(layout)
-            else -> throw IllegalArgumentException("Unsupported layout type.")
-        }
-    }
-}
+        if (viewHolder is Gest
