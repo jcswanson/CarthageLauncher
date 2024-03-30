@@ -10,9 +10,11 @@ package com.codesteem.mylauncher.gesture.transactions
  * index of the items will be adjusted by 1 to account for the header.
  * @author thesurix
  */
-class MoveTransaction<T>(private val from: Int,
-                         private val to: Int,
-                         private val headerEnabled: Boolean) : Transaction<T> {
+class MoveTransaction<T>(
+    private val from: Int,
+    private val to: Int,
+    private val headerEnabled: Boolean
+) : Transaction<T> {
 
     /**
      * Performs the move transaction by removing the item at the specified 'from' position and
@@ -25,13 +27,17 @@ class MoveTransaction<T>(private val from: Int,
      */
     override fun perform(transactional: Transactional<T>): Boolean {
         return with(transactional.data) {
-            val removedItem = removeAt(from)
-            removedItem?.let {
-                add(to, it)
-                val movedOffset = if (headerEnabled) 1 else 0
-                transactional.notifyMoved(from + movedOffset, to + movedOffset)
-                true
-            } ?: false
+            if (from in indices && to in indices) {
+                val removedItem = removeAt(from)
+                removedItem?.let {
+                    add(to, it)
+                    val movedOffset = if (headerEnabled) 1 else 0
+                    transactional.notifyMoved(from + movedOffset, to + movedOffset)
+                    true
+                } ?: false
+            } else {
+                false
+            }
         }
     }
 
@@ -44,4 +50,18 @@ class MoveTransaction<T>(private val from: Int,
      * @return True if the item was successfully moved back, false otherwise.
      */
     override fun revert(transactional: Transactional<T>): Boolean {
-        return
+        return with(transactional.data) {
+            if (from in indices && to in indices) {
+                val movedItem = removeAt(to)
+                movedItem?.let {
+                    add(from, it)
+                    val movedOffset = if (headerEnabled) 1 else 0
+                    transactional.notifyMoved(to + movedOffset, from + movedOffset)
+                    true
+                } ?: false
+            } else {
+                false
+            }
+        }
+    }
+}
