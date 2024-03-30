@@ -1,28 +1,46 @@
 package com.codesteem.mylauncher.test
 
-// Importing necessary classes and interfaces
 import android.graphics.drawable.Drawable
 import androidx.annotation.DrawableRes
 
-// Defining Month class that implements MonthItem interface
+sealed class MonthItem(open val name: String, open val openCounter: Int) {
+    enum class MonthItemType { MONTH, APP }
+}
+
 class Month(
-    // Overriding name property from MonthItem interface
-    override val name: String,
+    name: String,
+    @DrawableRes drawableRes: Int,
+    packageName: String,
+    counterNotification: Int? = null,
+    openCounter: Int
+) : MonthItem(name, openCounter) {
+    val drawableId: Drawable by lazy { appResources.getDrawable(drawableRes) }
+    val packageName: String
+    var counterNotification: Int?
 
-    // drawableId property to store the Drawable object
-    val drawableId: Drawable,
+    init {
+        this.packageName = packageName
+        this.counterNotification = counterNotification
+    }
+}
 
-    // packageName property to store the package name
-    val packageName: String,
+class App(
+    name: String,
+    @DrawableRes drawableRes: Int,
+    packageName: String,
+    counterNotification: Int? = null,
+    openCounter: Int
+) : MonthItem(name, openCounter) {
+    val drawableId: Drawable by lazy { appResources.getDrawable(drawableRes) }
+    val packageName: String
+    var counterNotification: Int?
 
-    // counterNotification property to store the counter notification
-    var counterNotification: Int? = 0, // Nullable integer to allow for optional notification count
+    init {
+        this.packageName = packageName
+        this.counterNotification = counterNotification
+    }
+}
 
-    // openCounter property to store the open counter
-    override val openCounter: Int // Inherited from MonthItem interface
-) : MonthItem {
-
-    // Overriding type property from MonthItem interface
-    override val type: MonthItem.MonthItemType
-        get() = MonthItem.MonthItemType.MONTH
+val appResources by lazy {
+    ApplicationProvider.getApplicationContext().resources
 }
