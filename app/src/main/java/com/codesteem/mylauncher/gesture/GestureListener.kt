@@ -1,6 +1,7 @@
 package com.codesteem.mylauncher.gesture
 
 import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.RecyclerView
 
 /**
  * A gesture listener that handles manually spawned drag gestures. This class is intended to be used with
@@ -15,27 +16,46 @@ import androidx.recyclerview.widget.ItemTouchHelper
  *
  * @author thesurix
  */
-class GestureListener(private val touchHelper: ItemTouchHelper) : GestureAdapter.OnGestureListener<Any> {
+class GestureListener(private val touchHelper: ItemTouchHelper) :
+    RecyclerView.OnItemTouchListener,
+    GestureAdapter.OnGestureListener<Any> {
 
-    /**
-     * Notifies the [ItemTouchHelper] to start tracking the drag movement of the given [viewHolder].
-     *
-     * This method is called when a drag gesture is first detected. It is responsible for initiating
-     * the drag movement and allowing the user to move the [viewHolder] to a new position in the
-     * RecyclerView.
-     *
-     * @param viewHolder The [GestureViewHolder] that is being dragged.
-     */
-    override fun onStartDrag(viewHolder: GestureViewHolder<Any>) {
-        touchHelper.startDrag(viewHolder)
+    private var draggingViewHolder: RecyclerView.ViewHolder? = null
+
+    override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
+        if (draggingViewHolder == null) {
+            val viewHolder = rv.findChildViewUnder(e.x, e.y)
+            if (viewHolder is GestureViewHolder<Any> && shouldInterceptTouchEvent(e)) {
+                touchHelper.startDrag(viewHolder)
+                draggingViewHolder = viewHolder
+                return true
+            }
+        }
+        return false
     }
 
-    /**
-     * Notifies the [ItemTouchHelper] to stop tracking the drag movement of the given [viewHolder].
-     *
-     * This method is called when the user has finished dragging the [viewHolder] to its new position.
-     * It is responsible for ending the drag movement and updating the RecyclerView with the new
-     * position of the [viewHolder].
-     *
-     * @param viewHolder The [GestureViewHolder] that has been dragged to its new position.
-     */
+    override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {
+        if (draggingViewHolder != null) {
+            touchHelper.processDrag(draggingViewHolder!!, rv, e)
+            if (!e.isActionInProgress) {
+                draggingViewHolder = null
+            }
+        }
+    }
+
+    override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}
+
+    override fun onStartDrag(viewHolder: GestureViewHolder<Any>) {
+        draggingViewHolder = viewHolder
+    }
+
+    override fun onStopDrag(viewHolder: GestureViewHolder<Any>) {
+        draggingViewHolder = null
+    }
+
+    private fun shouldInterceptTouchEvent(e: MotionEvent): Boolean {
+        // Implement your logic to determine if the touch event should be intercepted.
+        // For example, you may want to check if the user has long-pressed on an item.
+        return true
+    }
+}
