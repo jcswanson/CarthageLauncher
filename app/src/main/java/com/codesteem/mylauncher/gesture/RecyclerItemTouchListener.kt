@@ -1,92 +1,74 @@
-package com.codesteem.mylauncher.gesture
-
-import android.view.GestureDetector
-import android.view.MotionEvent
-import androidx.recyclerview.widget.RecyclerView
-
 /**
- * Class that is responsible for handling item touch events.
- * Constructs [RecyclerView] touch listener.
- * @param listener listener for item's click events
+ * This class, `RecyclerItemTouchListener`, is responsible for handling touch events in a [RecyclerView].
+ * It constructs a touch listener for the RecyclerView.
+ *
+ * @param listener The listener for item's click events.
  * @author thesurix
  */
 class RecyclerItemTouchListener<T>(listener: ItemClickListener<T>) : RecyclerView.SimpleOnItemTouchListener() {
 
+    // A GestureDetector is used to recognize various gestures performed on the RecyclerView.
     private var gestureDetector: GestureDetector? = null
 
     /**
-     * The listener that is used to notify when a tap, long press or double tap occur.
+     * The listener interface for handling tap, long press, and double tap events on items.
      */
     interface ItemClickListener<T> {
 
         /**
          * Called when a tap occurs on a specified item.
-         * @param item pressed item
-         * @param position item's position
-         * @return true if the event is consumed, else false
+         *
+         * @param item       The pressed item.
+         * @param position   The position of the item in the RecyclerView.
+         * @return true if the event is consumed, else false.
          */
         fun onItemClick(item: T, position: Int): Boolean
 
         /**
          * Called when a long press occurs on a specified item.
-         * @param item pressed item
-         * @param position item's position
+         *
+         * @param item       The pressed item.
+         * @param position   The position of the item in the RecyclerView.
          */
         fun onItemLongPress(item: T, position: Int)
 
         /**
          * Called when a double tap occurs on a specified item.
-         * @param item tapped item
-         * @param position item's position
-         * @return true if the event is consumed, else false
+         *
+         * @param item       The tapped item.
+         * @param position   The position of the item in the RecyclerView.
+         * @return true if the event is consumed, else false.
          */
         fun onDoubleTap(item: T, position: Int): Boolean
     }
 
-    private val gestureClickListener = GestureClickListener(listener)
+    // A private class for handling gesture events and notifying the listener.
+    private class GestureClickListener<T>(private val listener: RecyclerItemTouchListener.ItemClickListener<T>)
+        : GestureDetector.SimpleOnGestureListener() {
 
-    override fun onInterceptTouchEvent(view: RecyclerView, e: MotionEvent): Boolean {
+        // The currently touched item and its position in the RecyclerView.
+        private var item: T? = null
+        private var viewPosition = 0
 
-        val childView = view.findChildViewUnder(e.x, e.y) ?: return false
-        val childPosition = view.getChildAdapterPosition(childView)
-        if (childPosition == RecyclerView.NO_POSITION) {
-            return false
+        // Handles single tap events and notifies the listener.
+        override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
+            return item?.let { listener.onItemClick(it, viewPosition) } ?: false
         }
 
-        val adapter = view.adapter
-        if (adapter is GestureAdapter<*, *>) {
-            val gestureAdapter = adapter as GestureAdapter<T, *>
-            gestureClickListener.setTouchedItem(gestureAdapter.getItem(childPosition), childPosition)
+        // Handles long press events and notifies the listener.
+        override fun onLongPress(e: MotionEvent) {
+            item?.let { listener.onItemLongPress(it, viewPosition) }
         }
 
-        if (gestureDetector == null) {
-            gestureDetector = GestureDetector(view.context, gestureClickListener)
+        // Handles double tap events and notifies the listener.
+        override fun onDoubleTap(e: MotionEvent): Boolean {
+            return item?.let { listener.onDoubleTap(it, viewPosition) } ?: false
         }
 
-        return gestureDetector?.onTouchEvent(e) ?: false
-    }
-}
-
-private class GestureClickListener<T> internal constructor(private val listener: RecyclerItemTouchListener.ItemClickListener<T>)
-    : GestureDetector.SimpleOnGestureListener() {
-
-    private var item: T? = null
-    private var viewPosition = 0
-
-    override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
-        return item?.let { listener.onItemClick(it, viewPosition) } ?: false
-    }
-
-    override fun onLongPress(e: MotionEvent) {
-        item?.let { listener.onItemLongPress(it, viewPosition) }
-    }
-
-    override fun onDoubleTap(e: MotionEvent): Boolean {
-        return item?.let { listener.onDoubleTap(it, viewPosition) } ?: false
-    }
-
-    internal fun setTouchedItem(item: T, viewPosition: Int) {
-        this.item = item
-        this.viewPosition = viewPosition
+        // Sets the touched item and its position in the RecyclerView.
+        internal fun setTouchedItem(item: T, viewPosition: Int) {
+            this.item = item
+            this.viewPosition = viewPosition
+        }
     }
 }
