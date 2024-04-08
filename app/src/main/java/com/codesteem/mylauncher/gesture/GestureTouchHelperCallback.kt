@@ -8,52 +8,115 @@ import com.codesteem.mylauncher.gesture.LayoutFlags.*
 /**
  * Touch helper callback that handles different RecycleView gestures.
  * Constructs callback object based on passed adapter.
+ *
  * @param adapter adapter
  * @author thesurix
  */
 private val DIRECTIONS = listOf(ItemTouchHelper.LEFT, ItemTouchHelper.RIGHT, ItemTouchHelper.UP, ItemTouchHelper.DOWN)
 class GestureTouchHelperCallback(private val gestureAdapter: GestureAdapter<*, *>) : ItemTouchHelper.Callback() {
 
-    /** Flag that enables or disables swipe gesture  */
+    /**
+     * Flag that enables or disables swipe gesture 
+     */
     var swipeEnabled = false
-    /** Flag that enables or disables manual drag gesture  */
+
+    /**
+     * Flag that enables or disables manual drag gesture 
+     */
     var manualDragEnabled = false
         set(enabled) {
             field = enabled
-            gestureAdapter.allowManualDrag(manualDragEnabled)
+            gestureAdapter.allowManualDrag(manualDragEnabled) // Allows or disallows manual dragging for the adapter
         }
-    /** Flag that enables long press drag gesture  */
+
+    /**
+     * Flag that enables long press drag gesture 
+     */
     var longPressDragEnabled = false
 
-    /** Flags for drag gesture  */
+    /**
+     * Flags for drag gesture 
+     */
     var dragFlags = ItemTouchHelper.UP or ItemTouchHelper.DOWN
-    /** Flags for swipe gesture  */
+
+    /**
+     * Flags for swipe gesture 
+     */
     var swipeFlags = ItemTouchHelper.RIGHT
 
+    /**
+     * Determines the movement flags based on the view holder's drag and swipe capabilities.
+     *
+     * @param recyclerView The RecyclerView containing the view holder.
+     * @param viewHolder   The view holder to get the drag and swipe flags for.
+     * @return The movement flags for the view holder.
+     */
     override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
         val holder = viewHolder as GestureViewHolder<*>
-        return makeMovementFlags(if (holder.canDrag()) dragFlags else 0, if (holder.canSwipe()) swipeFlags else 0)
+        return makeMovementFlags(
+            if (holder.canDrag()) dragFlags else 0, // If the holder can drag, use the drag flags; otherwise, use 0
+            if (holder.canSwipe()) swipeFlags else 0 // If the holder can swipe, use the swipe flags; otherwise, use 0
+        )
     }
 
+    /**
+     * Called when an item is moved within the RecyclerView.
+     *
+     * @param recyclerView The RecyclerView containing the items.
+     * @param viewHolder   The source view holder of the moved item.
+     * @param target       The target view holder of the moved item.
+     * @return True if the item was moved successfully; false otherwise.
+     */
     override fun onMove(recyclerView: RecyclerView, source: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
-        return gestureAdapter.onItemMove(source.adapterPosition, target.adapterPosition)
+        return gestureAdapter.onItemMove(source.adapterPosition, target.adapterPosition) // Move the item in the adapter
     }
 
+    /**
+     * Called when an item is swiped in the RecyclerView.
+     *
+     * @param viewHolder The view holder of the swiped item.
+     * @param direction  The direction of the swipe.
+     */
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-        gestureAdapter.onItemDismissed(viewHolder.adapterPosition, direction)
+        gestureAdapter.onItemDismissed(viewHolder.adapterPosition, direction) // Dismiss the item in the adapter
     }
 
+    /**
+     * Called when a view holder is selected for a gesture action.
+     *
+     * @param viewHolder The selected view holder.
+     * @param actionState The state of the gesture action.
+     */
     override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
         super.onSelectedChanged(viewHolder, actionState)
         if (actionState != ItemTouchHelper.ACTION_STATE_IDLE && viewHolder is GestureViewHolder<*>) {
-            viewHolder.onItemSelect()
+            viewHolder.onItemSelect() // Perform any necessary actions when the view holder is selected
         }
     }
 
-    override fun onChildDraw(c: Canvas, recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, dX: Float, dY: Float,
-                             actionState: Int, isCurrentlyActive: Boolean) {
-        when(actionState) {
+    /**
+     * Called during a gesture action to draw the background and foreground views of the item.
+     *
+     * @param c                 The Canvas to draw on.
+     * @param recyclerView      The RecyclerView containing the item.
+     * @param viewHolder        The view holder of the item.
+     * @param dX                The horizontal displacement of the item.
+     * @param dY                The vertical displacement of the item.
+     * @param actionState       The state of the gesture action.
+     * @param isCurrentlyActive True if the gesture action is currently active; false otherwise.
+     */
+    override fun onChildDraw(
+        c: Canvas,
+        recyclerView: RecyclerView,
+        viewHolder: RecyclerView.ViewHolder,
+        dX: Float,
+        dY: Float,
+        actionState: Int,
+        isCurrentlyActive: Boolean
+    ) {
+        when (actionState) {
             ItemTouchHelper.ACTION_STATE_SWIPE -> {
+                // Handle swipe gestures
                 val direction = when {
                     dX.compareTo(0f) == 0 -> if (dY < 0) ItemTouchHelper.UP else ItemTouchHelper.DOWN
                     dY.compareTo(0f) == 0 -> if (dX < 0) ItemTouchHelper.LEFT else ItemTouchHelper.RIGHT
@@ -61,73 +124,15 @@ class GestureTouchHelperCallback(private val gestureAdapter: GestureAdapter<*, *
                 }
 
                 val gestureViewHolder = (viewHolder as GestureViewHolder<*>)
-                hideBackgroundViews(gestureViewHolder)
+                hideBackgroundViews(gestureViewHolder) // Hide any previously visible background views
 
                 if (direction != -1) {
                     val backgroundView = gestureViewHolder.getBackgroundView(direction)
                     backgroundView?.let {
                         if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE && backgroundView.visibility == View.GONE) {
-                            backgroundView.visibility = View.VISIBLE
+                            backgroundView.visibility = View.VISIBLE // Show the background view if it's not already visible
                         }
                     }
                 }
 
-                val foregroundView = gestureViewHolder.foregroundView
-                getDefaultUIUtil().onDraw(c, recyclerView, foregroundView, dX, dY, actionState, isCurrentlyActive)
-            }
-            else -> super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
-        }
-    }
 
-    override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
-        super.clearView(recyclerView, viewHolder)
-        gestureAdapter.onItemMoved()
-        if (viewHolder is GestureViewHolder<*>) {
-            viewHolder.onItemClear()
-            hideBackgroundViews(viewHolder)
-
-            val foregroundView = viewHolder.foregroundView
-            getDefaultUIUtil().clearView(foregroundView)
-        }
-    }
-
-    private fun hideBackgroundViews(viewHolder: GestureViewHolder<*>) {
-        DIRECTIONS.forEach {
-            viewHolder.getBackgroundView(it)?.visibility = View.GONE
-        }
-    }
-
-    override fun isLongPressDragEnabled(): Boolean {
-        return longPressDragEnabled
-    }
-
-    override fun isItemViewSwipeEnabled(): Boolean {
-        return swipeEnabled
-    }
-
-    /**
-     * Sets predefined drag flags for RecyclerView layout.
-     * @param layout type of the RecyclerView layout
-     */
-    fun setDragFlagsForLayout(layout: RecyclerView.LayoutManager) {
-        dragFlags = when (layout) {
-            is GridLayoutManager -> GRID.getDragFlags(layout)
-            is LinearLayoutManager -> LINEAR.getDragFlags(layout)
-            is StaggeredGridLayoutManager -> STAGGERED.getDragFlags(layout)
-            else -> throw IllegalArgumentException("Unsupported layout type.")
-        }
-    }
-
-    /**
-     * Sets predefined swipe flags for RecyclerView layout.
-     * @param layout type of the RecyclerView layout
-     */
-    fun setSwipeFlagsForLayout(layout: RecyclerView.LayoutManager) {
-        swipeFlags = when (layout) {
-            is GridLayoutManager -> GRID.getSwipeFlags(layout)
-            is LinearLayoutManager -> LINEAR.getSwipeFlags(layout)
-            is StaggeredGridLayoutManager -> STAGGERED.getSwipeFlags(layout)
-            else -> throw IllegalArgumentException("Unsupported layout type.")
-        }
-    }
-}
