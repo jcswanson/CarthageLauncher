@@ -1,1 +1,18 @@
-/build
+# This is the main build script for our project.
+# It contains commands to compile, test, and package our code.
+
+# First, we clean any previous build artifacts to ensure a fresh build.
+clean:
+	rm -f *.class
+
+# Next, we compile the Java source code into bytecode.
+compile:
+	javac -d . *.java
+
+# After compiling, we run tests to ensure everything works as expected.
+test:
+	java -cp .:junit-4.13.2.jar:hamcrest-core-1.3.jar org.junit.runner.JUnitCore TestClass
+
+# Finally, we package the compiled code and dependencies into a JAR file.
+package:
+	jar cvfm myproject.jar manifest.mf *.class
