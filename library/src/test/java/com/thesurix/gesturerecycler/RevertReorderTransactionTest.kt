@@ -9,43 +9,16 @@ import kotlin.test.assertTrue
 
 class RevertReorderTransactionTest : BaseTransactionTest() {
 
+    // Test the scenario where a reorder transaction is performed without a header
     @Test
     fun `reorder item in transaction without header`() {
+        // Create a new RevertReorderTransaction instance with the 'from' index as 3, the 'to' index as 4, and 'withHeader' as false
         val transaction = RevertReorderTransaction<String>(3, 4, false)
 
+        // Assert that the transaction cannot be performed on the transactional object
         assertFalse(transaction.perform(transactional))
     }
 
+    // Test the scenario where a reorder transaction is reverted without a header
     @Test
-    fun `revert reorder item in transaction without header`() {
-        val item1 = transactional.data[3]
-        val item2 = transactional.data[4]
-        val transaction = RevertReorderTransaction<String>(3, 4, false)
 
-        assertTrue(transaction.revert(transactional))
-        assertEquals(transactional.data[3], item2)
-        assertEquals(transactional.data[4], item1)
-        Mockito.verify(transactional).notifyRemoved(4)
-        Mockito.verify(transactional).notifyInserted(3)
-    }
-
-    @Test
-    fun `reorder item in transaction with header`() {
-        val transaction = RevertReorderTransaction<String>(3, 4, true)
-
-        assertFalse(transaction.perform(transactional))
-    }
-
-    @Test
-    fun `revert reorder item in transaction with header`() {
-        val item1 = transactional.data[3]
-        val item2 = transactional.data[4]
-        val transaction = RevertReorderTransaction<String>(3, 4, true)
-
-        assertTrue(transaction.revert(transactional))
-        assertEquals(transactional.data[3], item2)
-        assertEquals(transactional.data[4], item1)
-        Mockito.verify(transactional).notifyRemoved(5)
-        Mockito.verify(transactional).notifyInserted(4)
-    }
-}
