@@ -3,17 +3,31 @@ package com.codesteem.mylauncher.gesture
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 
+/**
+ * Constants
+ */
 private const val INVALID_FLAG = -1
 
 /**
- * Class that is responsible for gesture management for [RecyclerView] widget.
+ * GestureManager class is responsible for managing gestures for RecyclerView widget.
+ * It initializes a GestureTouchHelperCallback object and attaches it to the RecyclerView.
+ * The adapter associated with the RecyclerView must extend GestureAdapter.
+ *
  * @author thesurix
  */
-class GestureManager {
+class GestureManager private constructor(builder: Builder) {
 
+    /**
+     * GestureTouchHelperCallback object that handles gesture callbacks.
+     */
     private val touchHelperCallback: GestureTouchHelperCallback
 
-    private constructor(builder: Builder) {
+    /**
+     * Initializes a new instance of GestureManager with the given Builder object.
+     *
+     * @param builder Builder object containing RecyclerView instance and gesture flags.
+     */
+    init {
         val adapter = builder.recyclerView.adapter as GestureAdapter<Any, *>
         touchHelperCallback = GestureTouchHelperCallback(adapter).apply {
             swipeEnabled = builder.isSwipeEnabled
@@ -21,10 +35,14 @@ class GestureManager {
             manualDragEnabled = builder.isManualDragEnabled
         }
 
+        // Attaches the ItemTouchHelper to the RecyclerView.
         val touchHelper = ItemTouchHelper(touchHelperCallback)
         touchHelper.attachToRecyclerView(builder.recyclerView)
+
+        // Sets the GestureListener for the adapter.
         adapter.setGestureListener(GestureListener(touchHelper))
 
+        // Sets the swipe and drag flags for the RecyclerView.
         if (builder.swipeFlags == INVALID_FLAG) {
             touchHelperCallback.setSwipeFlagsForLayout(builder.recyclerView.layoutManager!!)
         } else {
@@ -37,16 +55,19 @@ class GestureManager {
             touchHelperCallback.dragFlags = builder.dragFlags
         }
 
+        // Sets the header and footer flags for the adapter.
         adapter.setHeaderEnabled(builder.isHeaderEnabled)
         adapter.setFooterEnabled(builder.isFooterEnabled)
     }
 
     /**
      * Returns true if swipe is enabled, false if swipe is disabled.
+     *
      * @return swipe state
      */
     /**
      * Sets swipe gesture enabled or disabled.
+     *
      * @param enabled true to enable, false to disable
      */
     var isSwipeEnabled: Boolean
@@ -57,10 +78,12 @@ class GestureManager {
 
     /**
      * Returns true if long press drag is enabled, false if long press drag is disabled.
+     *
      * @return long press drag state
      */
     /**
      * Sets long press drag gesture enabled or disabled.
+     *
      * @param enabled true to enable, false to disable
      */
     var isLongPressDragEnabled: Boolean
@@ -71,10 +94,12 @@ class GestureManager {
 
     /**
      * Returns true if manual drag is enabled, false if manual drag is disabled.
+     *
      * @return manual drag state
      */
     /**
      * Sets manual drag gesture enabled or disabled.
+     *
      * @param enabled true to enable, false to disable
      */
     var isManualDragEnabled: Boolean
@@ -84,29 +109,59 @@ class GestureManager {
         }
 
     /**
-     * Class that builds [GestureManager] instance.
-     * Constructs [GestureManager] for the given RecyclerView.
+     * Builder class for GestureManager.
+     * Constructs a GestureManager for the given RecyclerView.
+     *
      * @param recyclerView RecyclerView instance
      */
     class Builder(val recyclerView: RecyclerView) {
+
+        /**
+         * Flags for swipe gesture.
+         */
         internal var swipeFlags = INVALID_FLAG
             private set
+
+        /**
+         * Flags for drag gesture.
+         */
         internal var dragFlags = INVALID_FLAG
             private set
+
+        /**
+         * Flag for swipe gesture enabled or disabled.
+         */
         internal var isSwipeEnabled = false
             private set
+
+        /**
+         * Flag for long press drag gesture enabled or disabled.
+         */
         internal var isDragEnabled = false
             private set
+
+        /**
+         * Flag for manual drag gesture enabled or disabled.
+         */
         internal var isManualDragEnabled = false
             private set
+
+        /**
+         * Flag for header item enabled or disabled.
+         */
         internal var isHeaderEnabled = false
             private set
+
+        /**
+         * Flag for footer item enabled or disabled.
+         */
         internal var isFooterEnabled = false
             private set
 
         /**
          * Sets swipe gesture enabled or disabled.
          * Swipe is disabled by default.
+         *
          * @param enabled true to enable, false to disable
          * @return returns builder instance
          */
@@ -118,6 +173,7 @@ class GestureManager {
         /**
          * Sets long press drag gesture enabled or disabled.
          * Long press drag is disabled by default.
+         *
          * @param enabled true to enable, false to disable
          * @return returns builder instance
          */
@@ -129,6 +185,7 @@ class GestureManager {
         /**
          * Sets manual drag gesture enabled or disabled.
          * Manual drag is disabled by default.
+         *
          * @param enabled true to enable, false to disable
          * @return returns builder instance
          */
@@ -138,89 +195,4 @@ class GestureManager {
         }
 
         /**
-         * Sets flags for swipe and drag gesture. Do not set this flags if you want predefined flags for RecyclerView layout manager.
-         * See [ItemTouchHelper] flags.
-         *
-         * This method is deprecated, use [.setDragFlags] or [.setSwipeFlags].
-         * @param swipeFlags flags for swipe gesture
-         * @param dragFlags flags for drag gesture
-         * @return returns builder instance
-         */
-        @Deprecated("Use setSwipeFlags() and setDragFlags() methods.")
-        fun setGestureFlags(swipeFlags: Int, dragFlags: Int): Builder {
-            this.swipeFlags = swipeFlags
-            this.dragFlags = dragFlags
-            return this
-        }
-
-        /**
-         * Sets flags for swipe gesture. Do not set this flags if you want predefined flags for RecyclerView layout manager.
-         * See [ItemTouchHelper] flags.
-         * @param flags flags for swipe gesture
-         * @return returns builder instance
-         */
-        fun setSwipeFlags(flags: Int): Builder {
-            swipeFlags = flags
-            return this
-        }
-
-        /**
-         * Sets flags for drag gesture. Do not set this flags if you want predefined flags for RecyclerView layout manager.
-         * See [ItemTouchHelper] flags.
-         * @param flags flags for drag gesture
-         * @return returns builder instance
-         */
-        fun setDragFlags(flags: Int): Builder {
-            dragFlags = flags
-            return this
-        }
-
-
-        /**
-         * Sets header item enabled or disabled. If enabled then [RecyclerView.Adapter.onCreateViewHolder]
-         * will get [TYPE_HEADER_ITEM] as a viewType argument.
-         * Header is disabled by default.
-         * @param enabled true to enable, false to disable
-         * @return returns builder instance
-         */
-        fun setHeaderEnabled(enabled: Boolean): Builder {
-            isHeaderEnabled = enabled
-            return this
-        }
-
-        /**
-         * Sets footer item enabled or disabled. If enabled then [RecyclerView.Adapter.onCreateViewHolder]
-         * will get [TYPE_FOOTER_ITEM] as a viewType argument.
-         * Footer is disabled by default.
-         * @param enabled true to enable, false to disable
-         * @return returns builder instance
-         */
-        fun setFooterEnabled(enabled: Boolean): Builder {
-            isFooterEnabled = enabled
-            return this
-        }
-
-        /**
-         * Builds [GestureManager] instance.
-         * @return returns GestureManager instance
-         */
-        fun build(): GestureManager {
-            validateBuilder()
-            return GestureManager(this)
-        }
-
-        private fun validateBuilder() {
-            val hasAdapter = recyclerView.adapter is GestureAdapter<*, *>
-            if (!hasAdapter) {
-                throw IllegalArgumentException("RecyclerView does not have adapter that extends " + GestureAdapter::class.java.name)
-            }
-
-            if (swipeFlags == INVALID_FLAG || dragFlags == INVALID_FLAG) {
-                if (recyclerView.layoutManager == null) {
-                    throw IllegalArgumentException("No layout manager for RecyclerView. Provide custom flags or attach layout manager to RecyclerView.")
-                }
-            }
-        }
-    }
-
-}
+         * Sets
