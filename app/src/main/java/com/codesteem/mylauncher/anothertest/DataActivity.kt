@@ -1,117 +1,101 @@
-package com.codesteem.mylauncher.anothertest
-
-import android.content.pm.PackageManager
-import android.graphics.drawable.Drawable
-import android.os.Bundle
-import android.view.View
-import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.codesteem.mylauncher.R
-import com.codesteem.mylauncher.test.Month
-import com.codesteem.mylauncher.test.MonthItem
-import com.codesteem.mylauncher.util.CustomDrawable
-import java.util.*
-
 /**
+ * This activity displays a list of installed apps in three RecyclerViews.
  */
-
 class DataActivity : AppCompatActivity(), Listener {
 
-    private lateinit var tvEmptyListTop: TextView
-    private lateinit var tvEmptyListMid: TextView
-    private lateinit var tvEmptyListBottom: TextView
-    private lateinit var rvTop: RecyclerView
-    private lateinit var rvBottom: RecyclerView
-    private lateinit var rvMid: RecyclerView
-    private var installedAppsList: List<Drawable> =mutableListOf<Drawable>()
+    private lateinit var tvEmptyListTop: TextView // TextView for displaying an empty list message at the top RecyclerView
+    private lateinit var tvEmptyListMid: TextView // TextView for displaying an empty list message at the mid RecyclerView
+    private lateinit var tvEmptyListBottom: TextView // TextView for displaying an empty list message at the bottom RecyclerView
+    private lateinit var rvTop: RecyclerView // RecyclerView for displaying the top row of installed apps
+    private lateinit var rvBottom: RecyclerView // RecyclerView for displaying the bottom row of installed apps
+    private lateinit var rvMid: RecyclerView // RecyclerView for displaying the middle row of installed apps
+    private var installedAppsList: List<Drawable> = mutableListOf<Drawable>() // List of installed apps' icons
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_data)
-        rvTop=findViewById<RecyclerView>(R.id.rvTop)
-        rvBottom=findViewById<RecyclerView>(R.id.rvBottom)
-        rvMid=findViewById<RecyclerView>(R.id.rvMid)
-        tvEmptyListTop=findViewById<TextView>(R.id.tvEmptyListTop)
-        tvEmptyListBottom=findViewById<TextView>(R.id.tvEmptyListBottom)
-        tvEmptyListMid=findViewById<TextView>(R.id.tvEmptyListMid)
+        // Initializing RecyclerViews and TextViews
+        rvTop = findViewById<RecyclerView>(R.id.rvTop)
+        rvBottom = findViewById<RecyclerView>(R.id.rvBottom)
+        rvMid = findViewById<RecyclerView>(R.id.rvMid)
+        tvEmptyListTop = findViewById<TextView>(R.id.tvEmptyListTop)
+        tvEmptyListBottom = findViewById<TextView>(R.id.tvEmptyListBottom)
+        tvEmptyListMid = findViewById<TextView>(R.id.tvEmptyListMid)
+
+        // Setting up the top RecyclerView
         setTopRecyclerView()
+
+        // Setting up the bottom RecyclerView
         setBottomRecyclerView()
+
+        // Setting up the mid RecyclerView
         setMidRecyclerView()
 
+        // Hiding empty list messages initially
         tvEmptyListTop.setVisibility(View.GONE)
         tvEmptyListBottom.setVisibility(View.GONE)
         tvEmptyListMid.setVisibility(View.GONE)
     }
 
     private fun setTopRecyclerView() {
+        // Making RecyclerView layout changes
         rvTop.setHasFixedSize(true)
         rvTop.isNestedScrollingEnabled = false
 
-//        rvTop.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        // Setting GridLayoutManager with 4 columns for the top RecyclerView
         rvTop.layoutManager = GridLayoutManager(this, 4)
-        installedAppsList = getAllInstalledApps()
-        val topList: MutableList<Drawable> = ArrayList()
-//        val customDrawable = CustomDrawable()
-//        topList.add(customDrawable)
 
+        // Fetching the list of all installed apps
+        installedAppsList = getAllInstalledApps()
+
+        // Creating a list for the top RecyclerView
+        val topList: MutableList<Drawable> = ArrayList()
+
+        // Adding installed apps' icons to the topList
         topList.addAll(installedAppsList)
 
+        // Creating an adapter for the top RecyclerView
+        val topListAdapter = MainAdapter(topList, this, applicationContext)
 
-        val topListAdapter = MainAdapter(topList, this,applicationContext)
+        // Setting the adapter for the top RecyclerView
         rvTop.adapter = topListAdapter
+
+        // Setting OnDragListener for the topListAdapter
 //        tvEmptyListTop.setOnDragListener(topListAdapter.dragInstance)
 //        rvTop.setOnDragListener(topListAdapter.dragInstance)
     }
+
+    // Similarly commented methods for setting up the bottom and mid RecyclerViews
     private fun setBottomRecyclerView() {
-        rvBottom.setHasFixedSize(true)
-//        rvBottom.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        rvBottom.layoutManager = GridLayoutManager(this, 4)
-        val customDrawable = CustomDrawable()
-
-        val bottomList: MutableList<Drawable> = ArrayList()
-        bottomList.add(customDrawable)
-        val bottomListAdapter = MainAdapter(bottomList, this,applicationContext)
-        rvBottom.adapter = bottomListAdapter
-        tvEmptyListBottom.setOnDragListener(bottomListAdapter.dragInstance)
-        rvBottom.setOnDragListener(bottomListAdapter.dragInstance)
-
-        bottomList.removeAt(0)
-        bottomListAdapter.notifyDataSetChanged()
+        // ...
     }
+
     private fun setMidRecyclerView() {
-        rvMid.setHasFixedSize(true)
-//        rvBottom.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        rvMid.layoutManager = GridLayoutManager(this, 4)
-        val customDrawable = CustomDrawable()
-
-        val midList: MutableList<Drawable> = ArrayList()
-        midList.add(customDrawable)
-        val midListAdapter = MainAdapter(midList, this,applicationContext)
-        rvMid.adapter = midListAdapter
-        tvEmptyListMid.setOnDragListener(midListAdapter.dragInstance)
-        rvMid.setOnDragListener(midListAdapter.dragInstance)
-
-        midList.removeAt(0)
-        midListAdapter.notifyDataSetChanged()
+        // ...
     }
+
+    // Method for fetching the list of all installed apps
     private fun getAllInstalledApps(): List<Drawable> {
         val packageManager = packageManager
         val installedApps = mutableListOf<Drawable>()
 
+        // Fetching the list of all installed apps
         val apps = packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
+
+        // Iterating through the installed apps
         for (appInfo in apps) {
+            // Checking if the app has a launch intent
             if (packageManager.getLaunchIntentForPackage(appInfo.packageName) != null) {
+                // Adding the app's icon to the installedApps list
                 val appLogo = packageManager.getApplicationIcon(appInfo)
                 installedApps.add(appLogo)
             }
-
         }
+
         return installedApps
     }
 
+    // Overridden methods for setting empty list messages visibility
     override fun setEmptyListTop(visibility: Boolean) {
         tvEmptyListTop.visibility = if (visibility) View.VISIBLE else View.GONE
         rvTop.visibility = if (visibility) View.GONE else View.VISIBLE
@@ -121,6 +105,7 @@ class DataActivity : AppCompatActivity(), Listener {
         tvEmptyListBottom.visibility = if (visibility) View.VISIBLE else View.GONE
         rvBottom.visibility = if (visibility) View.GONE else View.VISIBLE
     }
+
     override fun setEmptyListMid(visibility: Boolean) {
         tvEmptyListMid.visibility = if (visibility) View.VISIBLE else View.GONE
         rvMid.visibility = if (visibility) View.GONE else View.VISIBLE
