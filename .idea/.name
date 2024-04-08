@@ -1,1 +1,50 @@
-Beta Backers
+# This is a dictionary that maps each backer's name to their pledge amount
+backers = {
+    "Alice": 100,
+    "Bob": 50,
+    "Charlie": 25,
+}
+
+# This function calculates the total amount of pledges from all backers
+def calculate_total_pledged():
+    # Initialize the total pledged to 0
+    total_pledged = 0
+
+    # Loop through each backer in the backers dictionary
+    for backer, pledge in backers.items():
+        # Add the backer's pledge to the total pledged
+        total_pledged += pledge
+
+    # Return the total pledged
+    return total_pledged
+
+# This function prints the name and pledge amount of each backer
+def print_backers():
+    # Loop through each backer in the backers dictionary
+    for backer, pledge in backers.items():
+        # Print the backer's name and pledge amount
+        print(f"{backer} pledged ${pledge}")
+
+# This function removes a backer from the backers dictionary
+def remove_backer(backer):
+    # If the backer is in the backers dictionary
+    if backer in backers:
+        # Remove the backer from the backers dictionary
+        del backers[backer]
+    else:
+        # Print an error message
+        print(f"{backer} is not a backer")
+
+# This is the main function that runs the program
+def main():
+    # Print the total amount of pledges
+    print(f"Total pledged: ${calculate_total_pledged()}")
+
+    # Print the name and pledge amount of each backer
+    print_backers()
+
+    # Remove a backer
+    remove_backer("Alice")
+
+    # Print the total amount of pledges after removing a backer
+    print(f"Total pled
