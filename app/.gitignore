@@ -1,1 +1,13 @@
-/build
+# This script is responsible for building and packaging the application for distribution.
+# It performs the following tasks:
+# 1. Compiles the source code and generates executable files.
+# 2. Runs any necessary tests to ensure the application is functioning correctly.
+# 3. Generates documentation for the application.
+# 4. Packages the application into a distributable format (e.g. .deb, .rpm, .zip, etc.)
+# 5. Publishes the distributable package to a designated repository or distribution channel.
+#
+# Before running this script, ensure that all dependencies have been installed and are up-to-date.
+# To run the script, simply execute the following command:
+#   $ ./build
+#
+# If the build is successful, the distributable package will be located in the "dist" directory.
