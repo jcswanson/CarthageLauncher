@@ -1,42 +1,57 @@
+// Apply the Android Library plugin to enable building Android libraries.
 apply plugin: 'com.android.library'
+
+// Apply the Kotlin plugin to enable Kotlin support.
 apply plugin: 'kotlin-android'
+
+// Disabled the Kotlin Android Extensions plugin, as it's no longer recommended.
 //apply plugin: 'kotlin-android-extensions'
 
+// Version information for publishing the library.
 ext {
+    // The group ID for the published library.
     PUBLISH_GROUP_ID = 'com.github.thesurix'
+    // The version number for the published library.
     PUBLISH_VERSION = '1.17.0'
+    // The artifact ID for the published library.
     PUBLISH_ARTIFACT_ID = 'gesture-recycler'
 }
 
+// Apply the Gradle script for publishing to Maven Central.
 apply from: "${rootProject.projectDir}/publish-mavencentral.gradle"
 
 android {
+    // The compile SDK version for the library.
     compileSdkVersion project.getProperty("compileSdk") as Integer
+    // The build tools version for the library.
     buildToolsVersion buildTools
 
     defaultConfig {
+        // The minimum SDK version for the library.
         minSdkVersion project.getProperty("minSdk") as Integer
+        // The target SDK version for the library.
         targetSdkVersion project.getProperty("targetSdk") as Integer
+        // The version code for the library.
         versionCode 1
+        // The version name for the library.
         versionName version
     }
+
     buildTypes {
         release {
+            // The ProGuard rules for the library.
             consumerProguardFiles 'lib-proguard-rules.pro'
         }
     }
 }
 
+// Declare the dependencies for the library.
 dependencies {
+    // Implementation dependencies for the library.
     implementation supportDependencies.recyclerView
     implementation supportDependencies.appCompat
     implementation langDependencies.kotlin
 
+    // Test dependencies for the library.
     testImplementation testDependencies.junit
-    testImplementation testDependencies.mockito
-    testImplementation testDependencies.junitKotlin
-}
-
-tasks.withType(Javadoc).all {
-    enabled = false
-}
+   
