@@ -1,29 +1,13 @@
-package com.codesteem.mylauncher.gesture.transactions
-
-import com.codesteem.mylauncher.gesture.util.swap
-
 /**
+ * A [Transaction] implementation that swaps the elements at the given [firstIndex] and [secondIndex] positions in a [Transactional] data collection.
+ *
+ * This class is parameterized with the type of elements in the data collection (T).
+ *
  * @author thesurix
+ * @property firstIndex The index of the first element to be swapped.
+ * @property secondIndex The index of the second element to be swapped.
+ * @property headerEnabled A flag indicating whether the data collection has a header row. If true, the offset of the changed indices will be increased by 1 to account for the header row.
  */
 class SwapTransaction<T>(private val firstIndex: Int,
                          private val secondIndex: Int,
-                         private val headerEnabled: Boolean) : Transaction<T> {
 
-    override fun perform(transactional: Transactional<T>): Boolean {
-        transactional.data.swap(firstIndex, secondIndex)
-        notifyChanged(transactional)
-        return true
-    }
-
-    override fun revert(transactional: Transactional<T>): Boolean {
-        transactional.data.swap(secondIndex, firstIndex)
-        notifyChanged(transactional)
-        return true
-    }
-
-    private fun notifyChanged(transactional: Transactional<T>) {
-        val changedOffset = + if(headerEnabled) 1 else 0
-        transactional.notifyChanged(firstIndex + changedOffset)
-        transactional.notifyChanged(secondIndex + changedOffset)
-    }
-}
