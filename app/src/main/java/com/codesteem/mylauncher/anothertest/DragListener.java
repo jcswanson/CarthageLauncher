@@ -6,31 +6,42 @@ import android.view.View;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-
 import com.codesteem.mylauncher.R;
 
-import java.util.List;
-
 /**
+ * A custom OnDragListener implementation that handles drag and drop events for RecyclerView items.
  */
-
 public class DragListener implements View.OnDragListener {
 
+    // Flag to track if an item has been dropped during the current drag event
     private boolean isDropped = false;
+    
+    // Listener for drag events
     private Listener listener;
 
+    /**
+     * Constructs a DragListener instance with the given Listener.
+     *
+     * @param listener The Listener to be notified of drag events.
+     */
     public DragListener(Listener listener) {
         this.listener = listener;
     }
 
+    /**
+     * Handles drag events for a view.
+     *
+     * @param view     The view for which the drag event is being dispatched.
+     * @param event    The drag event.
+     * @return True if the drag event was handled, false otherwise.
+     */
     @Override
     public boolean onDrag(View view, DragEvent event) {
         if (event.getAction() == DragEvent.ACTION_DROP) {
             isDropped = true;
             int positionTarget = -1;
 
-            View viewSource = (View) event.getLocalState();
-            int viewId = view.getId();
+            // View IDs for the source and target views
             final int cvItem = R.id.cvGrid;
             final int tvEmptyListTop = R.id.tvEmptyListTop;
             final int tvEmptyListBottom = R.id.tvEmptyListBottom;
@@ -39,21 +50,23 @@ public class DragListener implements View.OnDragListener {
             final int rvBottom = R.id.rvBottom;
             final int rvMid = R.id.rvMid; // New ID for rvMid
 
-            if (viewId == cvItem || viewId == tvEmptyListTop || viewId == tvEmptyListBottom || viewId == tvEmptyListMid || viewId == rvTop || viewId == rvBottom || viewId == rvMid) { // Include the new views
+            // Check if the event occurred over a valid target view
+            if (view.getId() == cvItem || view.getId() == tvEmptyListTop || view.getId() == tvEmptyListBottom || view.getId() == tvEmptyListMid || view.getId() == rvTop || view.getId() == rvBottom || view.getId() == rvMid) { // Include the new views
 
                 RecyclerView target;
-                if (viewId == tvEmptyListTop || viewId == rvTop) {
+                if (view.getId() == tvEmptyListTop || view.getId() == rvTop) {
                     target = (RecyclerView) view.getRootView().findViewById(rvTop);
-                } else if (viewId == tvEmptyListBottom || viewId == rvBottom) {
+                } else if (view.getId() == tvEmptyListBottom || view.getId() == rvBottom) {
                     target = (RecyclerView) view.getRootView().findViewById(rvBottom);
-                } else if (viewId == tvEmptyListMid || viewId == rvMid) { // Handle the new views
+                } else if (view.getId() == tvEmptyListMid || view.getId() == rvMid) { // Handle the new views
                     target = (RecyclerView) view.getRootView().findViewById(rvMid);
                 } else {
                     target = (RecyclerView) view.getParent();
                     positionTarget = (int) view.getTag();
                 }
 
-                if (viewSource != null) {
+                if (event.getLocalState() != null) {
+                    View viewSource = (View) event.getLocalState();
                     RecyclerView source = (RecyclerView) viewSource.getParent();
 
                     MainAdapter adapterSource = (MainAdapter) source.getAdapter();
@@ -71,6 +84,7 @@ public class DragListener implements View.OnDragListener {
                     MainAdapter adapterTarget = (MainAdapter) target.getAdapter();
                     List<Drawable> customListTarget = adapterTarget.getList();
 
+                    // Add the item to the target list
                     if (source == target) {
                         // Reorder the item within the same RecyclerView
                         if (positionTarget >= 0) {
@@ -97,16 +111,16 @@ public class DragListener implements View.OnDragListener {
                     if (sourceId == rvMid && adapterSource.getItemCount() < 1) {
                         listener.setEmptyListMid(true);
                     }
-                    if (viewId == tvEmptyListBottom) {
+                    if (view.getId() == tvEmptyListBottom) {
                         listener.setEmptyListBottom(false);
                     }
-                    if (viewId == tvEmptyListMid) {
+                    if (view.getId() == tvEmptyListMid) {
                         listener.setEmptyListMid(false);
                     }
                     if (sourceId == rvTop && adapterSource.getItemCount() < 1) {
                         listener.setEmptyListTop(true);
                     }
-                    if (viewId == tvEmptyListTop) {
+                    if (view.getId() == tvEmptyListTop) {
                         listener.setEmptyListTop(false);
                     }
                 }
@@ -119,5 +133,6 @@ public class DragListener implements View.OnDragListener {
         return true;
     }
 
-
-}
+    /**
+     * Interface for listening to drag events.
+    
